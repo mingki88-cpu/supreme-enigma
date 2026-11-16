@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>그림자 천문대 탈출</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 밤의 천문대, 긴장감 있지만 중학생이 즐겁게 풀 수 있는 모험
+   IDEA: 문을 하나 열 때마다 달이 태양을 조금씩 가리는 '일식 진행판'
+   PICTURE: 머리판의 큰 태양과 달 — 마지막 문에서 개기 일식(코로나)
+   COLOUR and TYPE: 깊은 남색 하늘, 태양 금색, 핏빛 달 붉은 강조 / Do Hyeon + Noto Sans KR
+   LAYOUT: 진행판 → 문(장치 화면) → 4인 대원 카드 → 암호 입력, 한 줄 흐름 */
+:root{color-scheme:dark;--bg:#0b1026;--bg2:#141b3d;--card:#1b2350;--ink:#eef0ff;--mute:#a9b0d6;--sun:#ffc94a;--red:#ff6a4d;--ok:#7be0a6;--line:#2c3672}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#1d2a66 0%,var(--bg) 60%) fixed,var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Do Hyeon","Noto Sans KR",sans-serif;font-weight:400;line-height:1.1;margin:0;text-wrap:balance}
+.wrap{max-width:980px;margin:0 auto;padding:clamp(18px,3vw,36px) max(4vw,14px)}
+.top{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:24px;align-items:center}
+.top h1{font-size:clamp(34px,6vw,52px);color:var(--sun)}
+.top p{color:var(--mute);margin:8px 0 0}
+.stat{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.chip{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px;white-space:nowrap}
+.chip b{color:var(--sun);font-variant-numeric:tabular-nums}
+#prog{width:100%;max-width:220px;aspect-ratio:1;justify-self:center}
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:22px 0 4px}
+.steps span{height:8px;border-radius:4px;background:var(--line)}
+.steps span.done{background:var(--sun)}.steps span.now{background:var(--red)}
+.panel{background:linear-gradient(180deg,var(--bg2),#10163a);border:1px solid var(--line);border-radius:18px;padding:clamp(18px,3vw,30px);margin-top:18px}
+.panel h2{font-size:clamp(28px,4.5vw,40px)}
+.tag{display:inline-block;color:var(--red);font-weight:700;font-size:14px;margin-bottom:6px}
+.story{color:var(--mute);margin:10px 0 0}
+.device{margin-top:18px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}
+.cbtn{min-height:64px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;padding:8px}
+.cbtn b{display:block;font-family:"Do Hyeon";font-size:22px;font-weight:400;color:var(--sun)}
+.cbtn small{color:var(--mute)}
+.cbtn[aria-pressed=true]{border-color:var(--sun);background:#26306a}
+.cbtn:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.cardbox{margin-top:12px;background:#f6f1e3;color:#1c1a14;border-radius:14px;padding:18px 20px;min-height:90px;font-size:17px;position:relative}
+.cardbox.empty{background:transparent;color:var(--mute);border:2px dashed var(--line);font-size:15px}
+.cardbox h3{font-size:22px;margin-bottom:6px;color:#8a3b1c}
+.cardbox table{border-collapse:collapse;margin-top:6px}
+.cardbox td{border:1px solid #c9bfa6;padding:4px 12px}
+.lock{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;align-items:center}
+.lock input::placeholder{letter-spacing:0}
+.lock input{flex:1 1 220px;font:24px/1 "Do Hyeon",sans-serif;letter-spacing:.2em;padding:12px 16px;border-radius:12px;border:2px solid var(--line);background:#070b1d;color:var(--ink);text-transform:uppercase;min-height:52px}
+.btn{min-height:48px;padding:0 22px;border-radius:12px;border:0;background:var(--sun);color:#1a1300;font:700 16px "Noto Sans KR",sans-serif;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.msg{min-height:26px;margin-top:10px;font-weight:700}
+.msg.bad{color:var(--red)}.msg.good{color:var(--ok)}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hints{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.hint{background:#2a1f12;border-left:4px solid var(--sun);padding:10px 14px;border-radius:8px;margin-top:10px;color:#ffe7b0}
+.photos{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.photo{background:#05081a;border-radius:12px;padding:8px 6px 6px;text-align:center;border:1px solid var(--line)}
+.photo svg{width:100%;height:auto;display:block}
+.photo b{font-family:"Do Hyeon";font-size:26px;font-weight:400;color:var(--sun)}
+.maps{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.map{background:#05081a;border-radius:12px;border:1px solid var(--line);padding:10px}
+.map svg{width:100%;height:auto;display:block}
+.map p{margin:4px 6px 0;color:var(--mute);font-size:14px}
+.roles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.role{background:var(--card);border-radius:12px;padding:12px;border:1px solid var(--line)}
+.role b{font-family:"Do Hyeon";font-weight:400;font-size:20px;color:var(--sun);display:block}
+.role span{font-size:14px;color:var(--mute)}
+ol.rules{padding-left:20px;color:var(--mute)}ol.rules li{margin:4px 0}
+.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:18px;color:var(--mute);font-size:14px;align-items:center}
+.dlg{position:fixed;inset:0;background:rgba(3,5,15,.75);display:none;place-items:center;padding:16px;z-index:9}
+.dlg.on{display:grid}
+.dlg div{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:380px}
+.big{font-family:"Do Hyeon";font-size:clamp(40px,8vw,64px);color:var(--sun);font-variant-numeric:tabular-nums}
+@media(max-width:700px){.top{grid-template-columns:1fr}#prog{max-width:160px;grid-row:1}.cards,.roles{grid-template-columns:repeat(2,minmax(0,1fr))}.photos{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>그림자 천문대 탈출</h1>
+      <p>일식과 월식의 비밀을 풀어 5개의 문을 열어라! · 4인 모둠용</p>
+      <div class="stat">
+        <span class="chip">모둠 <b id="tName">-</b></span>
+        <span class="chip">경과 시간 <b id="tTime">00:00</b></span>
+        <span class="chip">힌트 사용 <b id="tHint">0</b></span>
+      </div>
+    </div>
+    <svg id="prog" viewBox="0 0 200 200" role="img" aria-label="진행 상황: 달이 태양을 가리는 정도"></svg>
+  </header>
+  <div class="steps" id="steps"></div>
+  <main id="main"></main>
+  <div class="foot"><span>천재교육 중학교 과학 Ⅶ. 태양계 — 04 일식과 월식</span><button class="btn ghost" id="reset" type="button">처음부터 다시</button></div>
+</div>
+<div class="dlg" id="dlg"><div><h3 style="font-size:24px">처음부터 다시 할까요?</h3><p style="color:var(--mute)">지금까지 연 문과 시간 기록이 모두 지워집니다.</p><div style="display:flex;gap:10px;padding:0;border:0;background:none"><button class="btn" id="yes" type="button">다시 시작</button><button class="btn ghost" id="no" type="button">취소</button></div></div></div>
+
+<script>
+{
+const cy=(str,seed=0)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return (4294967296*(2097151&h2)+(h1>>>0)).toString(36);};
+const LOCK=["25iiqe6xfro","1ggj47yidjk","1m6p700rq20","ig0cn4z0dv","1rdit8pwcd2"];
+
+/* 태양 사진(일식 단계) */
+const sun=(off,id,total)=>total
+ ?`<svg viewBox="0 0 100 100"><defs><radialGradient id="co${id}"><stop offset=".45" stop-color="#fff" stop-opacity=".95"/><stop offset=".62" stop-color="#cfe0ff" stop-opacity=".45"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="48" fill="url(#co${id})"/><circle cx="50" cy="50" r="31" fill="#05081a"/></svg>`
+ :`<svg viewBox="0 0 100 100"><defs><clipPath id="c${id}"><circle cx="50" cy="50" r="30"/></clipPath><radialGradient id="g${id}"><stop offset="0" stop-color="#fff2b8"/><stop offset="1" stop-color="#ffb52e"/></radialGradient></defs><circle cx="50" cy="50" r="30" fill="url(#g${id})"/><circle cx="${50+off}" cy="50" r="31" fill="#05081a" clip-path="url(#c${id})"/></svg>`;
+
+const PH=[{n:1,o:9},{n:3,o:-46},{n:5,o:46},{n:6,t:1},{n:8,o:28}];
+
+const MAP1=`<svg viewBox="0 0 600 260" role="img" aria-label="그림 1: 태양, 달, 지구와 달의 그림자. 지구 위 지점 A, B, C, D">
+<defs><radialGradient id="ms"><stop offset="0" stop-color="#fff2b8"/><stop offset="1" stop-color="#ffb52e"/></radialGradient></defs>
+<circle cx="0" cy="130" r="80" fill="url(#ms)"/><text x="18" y="236" fill="#ffc94a" font-size="16">태양</text>
+<polygon points="300,118 300,142 470,212 470,48" fill="#8a93c9" opacity=".22"/>
+<polygon points="300,118 300,142 447,130" fill="#000" opacity=".85"/>
+<circle cx="300" cy="130" r="12" fill="#c9cbd6"/><text x="286" y="104" fill="#eef0ff" font-size="16">달</text>
+<circle cx="500" cy="130" r="55" fill="#2f6fd0"/><path d="M500 75a55 55 0 0 1 0 110z" fill="#0a1a3a" opacity=".7"/>
+<text x="478" y="60" fill="#eef0ff" font-size="16">지구</text>
+<g fill="#ff6a4d"><circle cx="455" cy="98" r="5"/><circle cx="445" cy="130" r="5"/><circle cx="455" cy="162" r="5"/><circle cx="555" cy="130" r="5"/></g>
+<g fill="#fff" font-size="20" font-weight="700"><text x="430" y="92">A</text><text x="420" y="137">B</text><text x="430" y="182">C</text><text x="566" y="137">D</text></g>
+</svg>`;
+const ang=a=>[230+190*Math.cos(a*Math.PI/180),130+190*Math.sin(a*Math.PI/180)];
+const MP=[["E",-25],["F",-9],["G",0],["H",9]];
+const MAP2=`<svg viewBox="0 0 600 260" role="img" aria-label="그림 2: 태양, 지구와 지구의 그림자. 달의 위치 E, F, G, H">
+<circle cx="0" cy="130" r="80" fill="url(#ms)"/><text x="18" y="236" fill="#ffc94a" font-size="16">태양</text>
+<path d="M${ang(-38).join(' ')} A190 190 0 0 1 ${ang(22).join(' ')}" fill="none" stroke="#5b66a8" stroke-dasharray="5 6"/>
+${MP.map(([l,a])=>{const[x,y]=ang(a);return `<circle cx="${x}" cy="${y}" r="11" fill="#c9cbd6"/>`}).join('')}
+<polygon points="230,82 230,178 600,130" fill="#000" opacity=".72"/>
+<circle cx="230" cy="130" r="48" fill="#2f6fd0"/><path d="M230 82a48 48 0 0 1 0 96z" fill="#0a1a3a" opacity=".7"/>
+<text x="210" y="70" fill="#eef0ff" font-size="16">지구</text>
+${MP.map(([l,a])=>{const[x,y]=ang(a);return `<text x="${x+18}" y="${y+7}" fill="#fff" font-size="20" font-weight="700">${l}</text>`}).join('')}
+<text x="470" y="236" fill="#a9b0d6" font-size="14">점선: 달 궤도</text>
+</svg>`;
+
+const S=[
+{t:"첫 번째 문 · 정렬 장치",tag:"STAGE 1",story:"천문대 문 앞의 낡은 정렬 장치가 깜빡인다. “일식과 월식이 일어날 때 천체가 늘어선 순서를 입력하시오.”",dev:"",
+ c:[["천체 번호표","<table><tr><td>태양</td><td><b>4</b></td></tr><tr><td>지구</td><td><b>7</b></td></tr><tr><td>달</td><td><b>2</b></td></tr></table>"],
+    ["일식 메모","일식은 <b>달이 태양을 가려서</b> 태양이 보이지 않는 현상이다. 태양과 지구 사이에 있는 천체는 무엇일까?"],
+    ["월식 메모","월식은 <b>달이 지구의 그림자 속에</b> 들어가는 현상이다. 그림자는 빛을 받는 쪽의 반대편에 생긴다."],
+    ["입력 규칙","맨 왼쪽은 언제나 <b>태양</b>.<br>[일식 때 배열 3자리] + [월식 때 배열 3자리]<br>→ 숫자 6자리"]],
+ h:["일식: 태양 – 달 – 지구 / 월식: 태양 – 지구 – 달","앞의 세 자리는 4 2 7 이다."],ph:"숫자 6자리"},
+{t:"두 번째 문 · 음력 달력",tag:"STAGE 2",story:"벽에 걸린 커다란 음력 달력에 자물쇠가 달려 있다. “식(蝕)이 일어나는 날을 찾아라.”",dev:"",
+ c:[["질문 ①","태양 – 달 – 지구 순으로 일직선이 되는 날, 일식이 일어난다.<br>이날 <b>달의 위상</b>은 무엇일까?"],
+    ["질문 ②","태양 – 지구 – 달 순으로 일직선이 되는 날, 월식이 일어난다.<br>이날 <b>달의 위상</b>은 무엇일까?"],
+    ["위상 달력","<table><tr><td>삭</td><td>음력 1일</td></tr><tr><td>상현달</td><td>음력 7~8일</td></tr><tr><td>망(보름달)</td><td>음력 15일</td></tr><tr><td>하현달</td><td>음력 22~23일</td></tr></table>"],
+    ["입력 규칙","[일식 날 음력 날짜 2자리] + [월식 날 음력 날짜 2자리]<br>예) 음력 9일 → 09<br>→ 숫자 4자리"]],
+ h:["일식은 삭일 때, 월식은 망일 때 일어난다.","앞의 두 자리는 01 이다."],ph:"숫자 4자리"},
+{t:"세 번째 문 · 관측 사진 보관함",tag:"STAGE 3",story:"보관함 속에서 일식을 찍은 사진 5장이 뒤섞인 채 발견되었다. 순서대로 정리해야 보관함이 열린다.",
+ dev:()=>`<div class="photos">${PH.map((p,i)=>`<div class="photo">${sun(p.o||0,'p'+i,p.t)}<b>${p.n}</b></div>`).join('')}</div>`,
+ c:[["관측 기록 ①","태양은 <b>오른쪽부터</b> 가려지기 시작했다."],
+    ["관측 기록 ②","가려진 부분은 점점 커졌고, 마지막은 태양이 <b>완전히 가려진</b> 장면이었다."],
+    ["경고 쪽지","사진 5장 중 <b>1장은 가짜</b>다. 가려지는 방향이 반대인 사진이다."],
+    ["입력 규칙","가려지기 시작한 사진 → 완전히 가려진 사진 순서로, 사진 아래 숫자를 차례로 입력<br>→ 숫자 4자리"]],
+ h:["왼쪽이 파인 사진은 가짜다. 그 사진은 빼자.","첫 번째 숫자는 5 이다."],ph:"숫자 4자리"},
+{t:"네 번째 문 · 붉은 달 퀴즈",tag:"STAGE 4",story:"창밖으로 붉게 물든 달이 보인다. 문에 붙은 화면에 문제 4개가 떠오른다. 대원마다 자기 문제를 맡아 풀어라!",dev:"",
+ c:[["문제 ①","개기 월식 때 달은 어떻게 보일까?<br>① 하얗게 빛난다 ② 붉게 보인다 ③ 파랗게 보인다 ④ 전혀 보이지 않는다"],
+    ["문제 ②","개기 월식 때 달이 그렇게 보이는 까닭은?<br>① 달 표면이 원래 붉어서 ② 태양이 붉은빛만 내서 ③ 지구 대기를 지난 햇빛 중 붉은빛이 달에 비쳐서 ④ 달이 스스로 빛을 내서"],
+    ["문제 ③","월식이 일어날 때 달은 어느 쪽부터 어두워질까?<br>① 왼쪽 ② 오른쪽 ③ 위쪽 ④ 아래쪽"],
+    ["문제 ④","지구 그림자 속에 달의 <b>일부만</b> 들어가 그 부분이 어두워지는 현상은?<br>① 개기 일식 ② 부분 일식 ③ 개기 월식 ④ 부분 월식<br><br><small>입력 규칙: 문제 ①→④의 정답 번호를 차례로 → 숫자 4자리</small>"]],
+ h:["개기 월식 때 달은 붉게 보인다. 지구의 대기 때문이다.","앞의 두 자리는 2 3 이다."],ph:"숫자 4자리"},
+{t:"마지막 문 · 그림자 지도",tag:"STAGE 5",story:"출구 앞 지도에 그림 두 장이 그려져 있다. 그림자를 읽을 줄 아는 대원만 이 문을 열 수 있다.",
+ dev:()=>`<div class="maps"><div class="map">${MAP1}<p>그림 ① 진한 부분: 달의 그림자가 짙은 곳 · 옅은 부분: 그림자가 옅은 곳</p></div><div class="map">${MAP2}<p>그림 ② 검은 부분: 지구의 그림자</p></div></div>`,
+ c:[["질문 ①","그림 ①에서 <b>개기 일식</b>을 볼 수 있는 지점은?"],
+    ["질문 ②","그림 ①에서 일식을 <b>전혀 볼 수 없는</b> 지점은?<br><small>(낮인 곳과 밤인 곳을 생각해 보자)</small>"],
+    ["질문 ③","그림 ②에서 <b>개기 월식</b>이 일어나는 달의 위치는?"],
+    ["질문 ④","그림 ②에서 <b>월식이 일어나지 않는</b> 달의 위치는?<br><br><small>입력 규칙: 질문 ①→④의 답을 차례로 → 알파벳 4개</small>"]],
+ h:["개기 일식은 달의 짙은 그림자가 닿는 좁은 곳에서만 보인다. 밤인 곳에서는 태양이 보이지 않는다.","앞의 두 글자는 B D 이다."],ph:"알파벳 4개"}
+];
+const ROLES=["1번 대원","2번 대원","3번 대원","4번 대원"];
+
+let st={name:"",stage:-1,start:0,end:0,hints:0,wrong:0,shown:{}};
+try{const s=JSON.parse(localStorage.getItem("eclipseEsc")||"null");if(s&&typeof s.stage==="number")st=s;}catch(e){}
+const save=()=>{try{localStorage.setItem("eclipseEsc",JSON.stringify(st))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const drawProg=()=>{
+  const k=Math.max(0,Math.min(5,st.stage<0?0:st.stage)),off=[100,74,54,36,18,0][k],tot=k>=5;
+  $("prog").innerHTML=`<defs><radialGradient id="pg"><stop offset="0" stop-color="#fff2b8"/><stop offset="1" stop-color="#ffb52e"/></radialGradient><radialGradient id="pc"><stop offset=".45" stop-color="#fff" stop-opacity=".95"/><stop offset=".65" stop-color="#cfe0ff" stop-opacity=".4"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/></radialGradient><clipPath id="pcl"><circle cx="100" cy="100" r="60"/></clipPath></defs>
+  ${tot?`<circle cx="100" cy="100" r="98" fill="url(#pc)"/><circle cx="100" cy="100" r="61" fill="#070b1d"/>`:`<circle cx="100" cy="100" r="60" fill="url(#pg)"/><circle cx="${100+off}" cy="100" r="61" fill="#070b1d" clip-path="url(#pcl)"/>`}`;
+  $("steps").innerHTML=S.map((_,i)=>`<span class="${i<st.stage||st.stage>=5?'done':i===st.stage?'now':''}"></span>`).join('');
+};
+const fmt=ms=>{const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0')};
+setInterval(()=>{if(st.start)$("tTime").textContent=fmt((st.end||Date.now())-st.start)},500);
+
+const intro=()=>`<section class="panel"><span class="tag">미션 브리핑</span><h2>천문대에 갇혔다!</h2>
+<p class="story">일식 관측을 하러 온 천문대. 갑자기 정전이 되며 모든 문이 잠겼다. 문마다 일식과 월식에 관한 장치가 있고, 장치를 풀어야 다음 문이 열린다. 모둠원 4명이 힘을 모아 5개의 문을 열고 탈출하자!</p>
+<div class="roles">${ROLES.map((r,i)=>`<div class="role"><b>${r}</b><span>문마다 ${i+1}번 카드를 맡아요</span></div>`).join('')}</div>
+<ol class="rules"><li>문마다 카드 4장이 있어요. <b>자기 번호 카드만</b> 열어서 모둠원에게 <b>말로</b> 설명해요.</li><li>모두의 정보를 합쳐야 암호를 알 수 있어요.</li><li>막히면 힌트를 쓸 수 있지만, 힌트 사용 횟수가 기록돼요.</li><li>교과서 256~259쪽을 참고해도 좋아요.</li></ol>
+<div class="lock"><input id="nm" maxlength="12" placeholder="모둠 이름" style="letter-spacing:0;text-transform:none;font-size:20px"><button class="btn" id="go" type="button">탐사 시작</button></div></section>`;
+
+const stage=i=>{const s=S[i],sh=st.shown[i]||0;return `<section class="panel"><span class="tag">${s.tag} / 5</span><h2>${s.t}</h2><p class="story">${s.story}</p>
+<div class="device">${typeof s.dev==="function"?s.dev():s.dev}</div>
+<div class="cards">${s.c.map((c,j)=>`<button class="cbtn" type="button" data-c="${j}" aria-pressed="false"><b>${j+1}번 카드</b><small>${ROLES[j]}만 열기</small></button>`).join('')}</div>
+<div class="cardbox empty" id="cb" aria-live="polite">자기 번호 카드를 눌러 내용을 확인하고, 모둠원에게 말로 알려 주세요.</div>
+<form class="lock" id="lk"><input id="code" autocomplete="off" inputmode="${i===4?'text':'numeric'}" placeholder="${s.ph}" aria-label="암호 입력"><button class="btn" type="submit">문 열기</button></form>
+<div class="msg" id="msg" role="status"></div>
+<div class="hints"><button class="btn ghost" id="hb" type="button" ${sh>=2?'disabled':''}>힌트 보기 (${sh}/2)</button></div>
+<div id="hl">${s.h.slice(0,sh).map(t=>`<div class="hint">${t}</div>`).join('')}</div></section>`};
+
+const win=()=>`<section class="panel" style="text-align:center"><span class="tag">ESCAPE!</span><h2 style="font-size:clamp(34px,6vw,52px);color:var(--sun)">탈출 성공!</h2>
+<p class="story">달이 태양을 완전히 가린 순간, 마지막 문이 열렸다. 그림자의 비밀을 모두 풀어냈어요.</p>
+<div class="big">${fmt(st.end-st.start)}</div>
+<p style="color:var(--mute)">모둠 <b style="color:var(--ink)">${esc(st.name)}</b> · 힌트 ${st.hints}회 · 틀린 시도 ${st.wrong}회</p>
+<p style="color:var(--mute);margin-top:18px">선생님께 이 화면을 보여 주세요.</p></section>`;
+
+const render=()=>{
+  $("tName").textContent=st.name||"-";$("tHint").textContent=st.hints;
+  if(!st.start)$("tTime").textContent="00:00";
+  drawProg();
+  const m=$("main");
+  if(st.stage<0){m.innerHTML=intro();$("go").onclick=()=>{st.name=($("nm").value.trim()||"우리 모둠");st.stage=0;st.start=Date.now();st.end=0;save();render()};return}
+  if(st.stage>=5){m.innerHTML=win();return}
+  const i=st.stage;m.innerHTML=stage(i);
+  m.querySelectorAll(".cbtn").forEach(b=>b.onclick=()=>{
+    const j=+b.dataset.c,open=b.getAttribute("aria-pressed")==="true";
+    m.querySelectorAll(".cbtn").forEach(x=>x.setAttribute("aria-pressed","false"));
+    const cb=$("cb");
+    if(open){cb.className="cardbox empty";cb.innerHTML="자기 번호 카드를 눌러 내용을 확인하고, 모둠원에게 말로 알려 주세요.";return}
+    b.setAttribute("aria-pressed","true");cb.className="cardbox";cb.innerHTML=`<h3>${j+1}번 · ${S[i].c[j][0]}</h3>${S[i].c[j][1]}`;
+  });
+  $("hb").onclick=()=>{const sh=st.shown[i]||0;if(sh>=2)return;st.shown[i]=sh+1;st.hints++;save();render();};
+  $("lk").onsubmit=e=>{e.preventDefault();
+    const v=$("code").value.toUpperCase().replace(/[^0-9A-Z]/g,""),msg=$("msg");
+    if(!v){msg.className="msg bad";msg.textContent="암호를 입력하세요.";return}
+    if(cy("shadow"+i+":"+v,73)===LOCK[i]){
+      msg.className="msg good";msg.textContent="철컥! 문이 열렸다.";
+      st.stage++;if(st.stage>=5)st.end=Date.now();save();setTimeout(render,700);
+    }else{st.wrong++;save();msg.className="msg bad";msg.textContent="삐— 암호가 틀렸습니다. 카드를 다시 확인해 보세요.";
+      const inp=$("code");inp.classList.remove("shake");void inp.offsetWidth;inp.classList.add("shake");inp.select();}
+  };
+};
+$("reset").onclick=()=>$("dlg").classList.add("on");
+$("no").onclick=()=>$("dlg").classList.remove("on");
+$("yes").onclick=()=>{st={name:"",stage:-1,start:0,end:0,hints:0,wrong:0,shown:{}};save();$("dlg").classList.remove("on");render()};
+render();
+}
+</script>
+</body>
+</html>
