@@ -12,7 +12,7 @@
    IDEA: 문을 하나 열 때마다 달이 태양을 조금씩 가리는 '일식 진행판'
    PICTURE: 머리판의 큰 태양과 달 — 마지막 문에서 개기 일식(코로나)
    COLOUR and TYPE: 깊은 남색 하늘, 태양 금색, 핏빛 달 붉은 강조 / Do Hyeon + Noto Sans KR
-   LAYOUT: 진행판 → 문(장치 화면) → 4인 대원 카드 → 암호 입력, 한 줄 흐름 */
+   LAYOUT: 진행판 → 문(장치 화면) → 2인 대원 카드 → 암호 입력, 한 줄 흐름 */
 :root{color-scheme:dark;--bg:#0b1026;--bg2:#141b3d;--card:#1b2350;--ink:#eef0ff;--mute:#a9b0d6;--sun:#ffc94a;--red:#ff6a4d;--ok:#7be0a6;--line:#2c3672}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#1d2a66 0%,var(--bg) 60%) fixed,var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
@@ -33,7 +33,7 @@ h1,h2,h3{font-family:"Do Hyeon","Noto Sans KR",sans-serif;font-weight:400;line-h
 .tag{display:inline-block;color:var(--red);font-weight:700;font-size:14px;margin-bottom:6px}
 .story{color:var(--mute);margin:10px 0 0}
 .device{margin-top:18px}
-.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px}
 .cbtn{min-height:64px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;padding:8px}
 .cbtn b{display:block;font-family:"Do Hyeon";font-size:22px;font-weight:400;color:var(--sun)}
 .cbtn small{color:var(--mute)}
@@ -42,6 +42,8 @@ h1,h2,h3{font-family:"Do Hyeon","Noto Sans KR",sans-serif;font-weight:400;line-h
 .cardbox{margin-top:12px;background:#f6f1e3;color:#1c1a14;border-radius:14px;padding:18px 20px;min-height:90px;font-size:17px;position:relative}
 .cardbox.empty{background:transparent;color:var(--mute);border:2px dashed var(--line);font-size:15px}
 .cardbox h3{font-size:22px;margin-bottom:6px;color:#8a3b1c}
+.cardbox h4{font:400 19px "Do Hyeon",sans-serif;color:#8a3b1c;margin:14px 0 4px}.cardbox h4:first-of-type{margin-top:4px}
+.cardbox hr{border:0;border-top:1px dashed #c9bfa6;margin:14px 0 0}
 .cardbox table{border-collapse:collapse;margin-top:6px}
 .cardbox td{border:1px solid #c9bfa6;padding:4px 12px}
 .lock{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;align-items:center}
@@ -63,7 +65,7 @@ h1,h2,h3{font-family:"Do Hyeon","Noto Sans KR",sans-serif;font-weight:400;line-h
 .map{background:#05081a;border-radius:12px;border:1px solid var(--line);padding:10px}
 .map svg{width:100%;height:auto;display:block}
 .map p{margin:4px 6px 0;color:var(--mute);font-size:14px}
-.roles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.roles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
 .role{background:var(--card);border-radius:12px;padding:12px;border:1px solid var(--line)}
 .role b{font-family:"Do Hyeon";font-weight:400;font-size:20px;color:var(--sun);display:block}
 .role span{font-size:14px;color:var(--mute)}
@@ -73,7 +75,7 @@ ol.rules{padding-left:20px;color:var(--mute)}ol.rules li{margin:4px 0}
 .dlg.on{display:grid}
 .dlg div{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:380px}
 .big{font-family:"Do Hyeon";font-size:clamp(40px,8vw,64px);color:var(--sun);font-variant-numeric:tabular-nums}
-@media(max-width:700px){.top{grid-template-columns:1fr}#prog{max-width:160px;grid-row:1}.cards,.roles{grid-template-columns:repeat(2,minmax(0,1fr))}.photos{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.top{grid-template-columns:1fr}#prog{max-width:160px;grid-row:1}.photos{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -82,7 +84,7 @@ ol.rules{padding-left:20px;color:var(--mute)}ol.rules li{margin:4px 0}
   <header class="top">
     <div>
       <h1>그림자 천문대 탈출</h1>
-      <p>일식과 월식의 비밀을 풀어 5개의 문을 열어라! · 4인 모둠용</p>
+      <p>일식과 월식의 비밀을 풀어 5개의 문을 열어라! · 2인 모둠용</p>
       <div class="stat">
         <span class="chip">모둠 <b id="tName">-</b></span>
         <span class="chip">경과 시간 <b id="tTime">00:00</b></span>
@@ -153,7 +155,7 @@ const S=[
     ["경고 쪽지","사진 5장 중 <b>1장은 가짜</b>다. 가려지는 방향이 반대인 사진이다."],
     ["입력 규칙","가려지기 시작한 사진 → 완전히 가려진 사진 순서로, 사진 아래 숫자를 차례로 입력<br>→ 숫자 4자리"]],
  h:["왼쪽이 파인 사진은 가짜다. 그 사진은 빼자.","첫 번째 숫자는 5 이다."],ph:"숫자 4자리"},
-{t:"네 번째 문 · 붉은 달 퀴즈",tag:"STAGE 4",story:"창밖으로 붉게 물든 달이 보인다. 문에 붙은 화면에 문제 4개가 떠오른다. 대원마다 자기 문제를 맡아 풀어라!",dev:"",
+{t:"네 번째 문 · 붉은 달 퀴즈",tag:"STAGE 4",story:"창밖으로 붉게 물든 달이 보인다. 문에 붙은 화면에 문제 4개가 떠오른다. 두 대원이 문제를 2개씩 맡아 풀어라!",dev:"",
  c:[["문제 ①","개기 월식 때 달은 어떻게 보일까?<br>① 하얗게 빛난다 ② 붉게 보인다 ③ 파랗게 보인다 ④ 전혀 보이지 않는다"],
     ["문제 ②","개기 월식 때 달이 그렇게 보이는 까닭은?<br>① 달 표면이 원래 붉어서 ② 태양이 붉은빛만 내서 ③ 지구 대기를 지난 햇빛 중 붉은빛이 달에 비쳐서 ④ 달이 스스로 빛을 내서"],
     ["문제 ③","월식이 일어날 때 달은 어느 쪽부터 어두워질까?<br>① 왼쪽 ② 오른쪽 ③ 위쪽 ④ 아래쪽"],
@@ -167,7 +169,8 @@ const S=[
     ["질문 ④","그림 ②에서 <b>월식이 일어나지 않는</b> 달의 위치는?<br><br><small>입력 규칙: 질문 ①→④의 답을 차례로 → 알파벳 4개</small>"]],
  h:["개기 일식은 달의 짙은 그림자가 닿는 좁은 곳에서만 보인다. 밤인 곳에서는 태양이 보이지 않는다.","앞의 두 글자는 B D 이다."],ph:"알파벳 4개"}
 ];
-const ROLES=["1번 대원","2번 대원","3번 대원","4번 대원"];
+const ROLES=["1번 대원","2번 대원"];
+const PAIR=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,2],[1,3]],[[0,1],[2,3]],[[0,1],[2,3]]];
 
 let st={name:"",stage:-1,start:0,end:0,hints:0,wrong:0,shown:{}};
 try{const s=JSON.parse(localStorage.getItem("eclipseEsc")||"null");if(s&&typeof s.stage==="number")st=s;}catch(e){}
@@ -185,14 +188,14 @@ const fmt=ms=>{const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padSt
 setInterval(()=>{if(st.start)$("tTime").textContent=fmt((st.end||Date.now())-st.start)},500);
 
 const intro=()=>`<section class="panel"><span class="tag">미션 브리핑</span><h2>천문대에 갇혔다!</h2>
-<p class="story">일식 관측을 하러 온 천문대. 갑자기 정전이 되며 모든 문이 잠겼다. 문마다 일식과 월식에 관한 장치가 있고, 장치를 풀어야 다음 문이 열린다. 모둠원 4명이 힘을 모아 5개의 문을 열고 탈출하자!</p>
+<p class="story">일식 관측을 하러 온 천문대. 갑자기 정전이 되며 모든 문이 잠겼다. 문마다 일식과 월식에 관한 장치가 있고, 장치를 풀어야 다음 문이 열린다. 두 사람이 힘을 모아 5개의 문을 열고 탈출하자!</p>
 <div class="roles">${ROLES.map((r,i)=>`<div class="role"><b>${r}</b><span>문마다 ${i+1}번 카드를 맡아요</span></div>`).join('')}</div>
-<ol class="rules"><li>문마다 카드 4장이 있어요. <b>자기 번호 카드만</b> 열어서 모둠원에게 <b>말로</b> 설명해요.</li><li>모두의 정보를 합쳐야 암호를 알 수 있어요.</li><li>막히면 힌트를 쓸 수 있지만, 힌트 사용 횟수가 기록돼요.</li><li>교과서 256~259쪽을 참고해도 좋아요.</li></ol>
+<ol class="rules"><li>문마다 카드 4장이 있어요. <b>자기 번호 카드만</b> 열어서 모둠원에게 <b>말로</b> 설명해요.</li><li>두 사람의 정보를 합쳐야 암호를 알 수 있어요.</li><li>막히면 힌트를 쓸 수 있지만, 힌트 사용 횟수가 기록돼요.</li><li>교과서 256~259쪽을 참고해도 좋아요.</li></ol>
 <div class="lock"><input id="nm" maxlength="12" placeholder="모둠 이름" style="letter-spacing:0;text-transform:none;font-size:20px"><button class="btn" id="go" type="button">탐사 시작</button></div></section>`;
 
 const stage=i=>{const s=S[i],sh=st.shown[i]||0;return `<section class="panel"><span class="tag">${s.tag} / 5</span><h2>${s.t}</h2><p class="story">${s.story}</p>
 <div class="device">${typeof s.dev==="function"?s.dev():s.dev}</div>
-<div class="cards">${s.c.map((c,j)=>`<button class="cbtn" type="button" data-c="${j}" aria-pressed="false"><b>${j+1}번 카드</b><small>${ROLES[j]}만 열기</small></button>`).join('')}</div>
+<div class="cards">${ROLES.map((r,j)=>`<button class="cbtn" type="button" data-c="${j}" aria-pressed="false"><b>${j+1}번 카드</b><small>${r}만 열기</small></button>`).join('')}</div>
 <div class="cardbox empty" id="cb" aria-live="polite">자기 번호 카드를 눌러 내용을 확인하고, 모둠원에게 말로 알려 주세요.</div>
 <form class="lock" id="lk"><input id="code" autocomplete="off" inputmode="${i===4?'text':'numeric'}" placeholder="${s.ph}" aria-label="암호 입력"><button class="btn" type="submit">문 열기</button></form>
 <div class="msg" id="msg" role="status"></div>
@@ -218,7 +221,7 @@ const render=()=>{
     m.querySelectorAll(".cbtn").forEach(x=>x.setAttribute("aria-pressed","false"));
     const cb=$("cb");
     if(open){cb.className="cardbox empty";cb.innerHTML="자기 번호 카드를 눌러 내용을 확인하고, 모둠원에게 말로 알려 주세요.";return}
-    b.setAttribute("aria-pressed","true");cb.className="cardbox";cb.innerHTML=`<h3>${j+1}번 · ${S[i].c[j][0]}</h3>${S[i].c[j][1]}`;
+    b.setAttribute("aria-pressed","true");cb.className="cardbox";cb.innerHTML=`<h3>${j+1}번 대원 카드</h3>`+PAIR[i][j].map(k=>`<h4>${S[i].c[k][0]}</h4>${S[i].c[k][1]}`).join('<hr>');
   });
   $("hb").onclick=()=>{const sh=st.shown[i]||0;if(sh>=2)return;st.shown[i]=sh+1;st.hints++;save();render();};
   $("lk").onsubmit=e=>{e.preventDefault();
