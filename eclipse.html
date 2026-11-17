@@ -12,7 +12,7 @@
    IDEA: 문을 하나 열 때마다 달이 태양을 조금씩 가리는 '일식 진행판'
    PICTURE: 머리판의 큰 태양과 달 — 마지막 문에서 개기 일식(코로나)
    COLOUR and TYPE: 깊은 남색 하늘, 태양 금색, 핏빛 달 붉은 강조 / Do Hyeon + Noto Sans KR
-   LAYOUT: 진행판 → 문(장치 화면) → 2인 대원 카드 → 암호 입력, 한 줄 흐름 */
+   LAYOUT: 진행판 → 문(장치 화면) → 단서 쪽지 4장 → 암호 입력, 한 줄 흐름 */
 :root{color-scheme:dark;--bg:#0b1026;--bg2:#141b3d;--card:#1b2350;--ink:#eef0ff;--mute:#a9b0d6;--sun:#ffc94a;--red:#ff6a4d;--ok:#7be0a6;--line:#2c3672}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#1d2a66 0%,var(--bg) 60%) fixed,var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
@@ -33,7 +33,11 @@ h1,h2,h3{font-family:"Do Hyeon","Noto Sans KR",sans-serif;font-weight:400;line-h
 .tag{display:inline-block;color:var(--red);font-weight:700;font-size:14px;margin-bottom:6px}
 .story{color:var(--mute);margin:10px 0 0}
 .device{margin-top:18px}
-.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}
+.note{background:#f6f1e3;color:#1c1a14;border-radius:12px;padding:14px 16px;font-size:16px}
+.note h3{font-size:20px;color:#8a3b1c;margin-bottom:4px}
+.note table{border-collapse:collapse;margin-top:4px}.note td{border:1px solid #c9bfa6;padding:3px 10px}
+@media(max-width:700px){.cards{grid-template-columns:minmax(0,1fr)}}
 .cbtn{min-height:64px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;padding:8px}
 .cbtn b{display:block;font-family:"Do Hyeon";font-size:22px;font-weight:400;color:var(--sun)}
 .cbtn small{color:var(--mute)}
@@ -84,9 +88,9 @@ ol.rules{padding-left:20px;color:var(--mute)}ol.rules li{margin:4px 0}
   <header class="top">
     <div>
       <h1>그림자 천문대 탈출</h1>
-      <p>일식과 월식의 비밀을 풀어 5개의 문을 열어라! · 2인 모둠용</p>
+      <p>일식과 월식의 비밀을 풀어 5개의 문을 열어라! · 개인 활동용</p>
       <div class="stat">
-        <span class="chip">모둠 <b id="tName">-</b></span>
+        <span class="chip">탐사대원 <b id="tName">-</b></span>
         <span class="chip">경과 시간 <b id="tTime">00:00</b></span>
         <span class="chip">힌트 사용 <b id="tHint">0</b></span>
       </div>
@@ -155,13 +159,13 @@ const S=[
     ["경고 쪽지","사진 5장 중 <b>1장은 가짜</b>다. 가려지는 방향이 반대인 사진이다."],
     ["입력 규칙","가려지기 시작한 사진 → 완전히 가려진 사진 순서로, 사진 아래 숫자를 차례로 입력<br>→ 숫자 4자리"]],
  h:["왼쪽이 파인 사진은 가짜다. 그 사진은 빼자.","첫 번째 숫자는 5 이다."],ph:"숫자 4자리"},
-{t:"네 번째 문 · 붉은 달 퀴즈",tag:"STAGE 4",story:"창밖으로 붉게 물든 달이 보인다. 문에 붙은 화면에 문제 4개가 떠오른다. 두 대원이 문제를 2개씩 맡아 풀어라!",dev:"",
+{t:"네 번째 문 · 붉은 달 퀴즈",tag:"STAGE 4",story:"창밖으로 붉게 물든 달이 보인다. 문에 붙은 화면에 문제 4개가 떠오른다. 4문제를 모두 풀어라!",dev:"",
  c:[["문제 ①","개기 월식 때 달은 어떻게 보일까?<br>① 하얗게 빛난다 ② 붉게 보인다 ③ 파랗게 보인다 ④ 전혀 보이지 않는다"],
     ["문제 ②","개기 월식 때 달이 그렇게 보이는 까닭은?<br>① 달 표면이 원래 붉어서 ② 태양이 붉은빛만 내서 ③ 지구 대기를 지난 햇빛 중 붉은빛이 달에 비쳐서 ④ 달이 스스로 빛을 내서"],
     ["문제 ③","월식이 일어날 때 달은 어느 쪽부터 어두워질까?<br>① 왼쪽 ② 오른쪽 ③ 위쪽 ④ 아래쪽"],
     ["문제 ④","지구 그림자 속에 달의 <b>일부만</b> 들어가 그 부분이 어두워지는 현상은?<br>① 개기 일식 ② 부분 일식 ③ 개기 월식 ④ 부분 월식<br><br><small>입력 규칙: 문제 ①→④의 정답 번호를 차례로 → 숫자 4자리</small>"]],
  h:["개기 월식 때 달은 붉게 보인다. 지구의 대기 때문이다.","앞의 두 자리는 2 3 이다."],ph:"숫자 4자리"},
-{t:"마지막 문 · 그림자 지도",tag:"STAGE 5",story:"출구 앞 지도에 그림 두 장이 그려져 있다. 그림자를 읽을 줄 아는 대원만 이 문을 열 수 있다.",
+{t:"마지막 문 · 그림자 지도",tag:"STAGE 5",story:"출구 앞 지도에 그림 두 장이 그려져 있다. 그림자를 읽을 줄 아는 사람만 이 문을 열 수 있다.",
  dev:()=>`<div class="maps"><div class="map">${MAP1}<p>그림 ① 진한 부분: 달의 그림자가 짙은 곳 · 옅은 부분: 그림자가 옅은 곳</p></div><div class="map">${MAP2}<p>그림 ② 검은 부분: 지구의 그림자</p></div></div>`,
  c:[["질문 ①","그림 ①에서 <b>개기 일식</b>을 볼 수 있는 지점은?"],
     ["질문 ②","그림 ①에서 일식을 <b>전혀 볼 수 없는</b> 지점은?<br><small>(낮인 곳과 밤인 곳을 생각해 보자)</small>"],
@@ -169,12 +173,10 @@ const S=[
     ["질문 ④","그림 ②에서 <b>월식이 일어나지 않는</b> 달의 위치는?<br><br><small>입력 규칙: 질문 ①→④의 답을 차례로 → 알파벳 4개</small>"]],
  h:["개기 일식은 달의 짙은 그림자가 닿는 좁은 곳에서만 보인다. 밤인 곳에서는 태양이 보이지 않는다.","앞의 두 글자는 B D 이다."],ph:"알파벳 4개"}
 ];
-const ROLES=["1번 대원","2번 대원"];
-const PAIR=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,2],[1,3]],[[0,1],[2,3]],[[0,1],[2,3]]];
 
 let st={name:"",stage:-1,start:0,end:0,hints:0,wrong:0,shown:{}};
-try{const s=JSON.parse(localStorage.getItem("eclipseEsc")||"null");if(s&&typeof s.stage==="number")st=s;}catch(e){}
-const save=()=>{try{localStorage.setItem("eclipseEsc",JSON.stringify(st))}catch(e){}};
+try{const s=JSON.parse(localStorage.getItem("eclipseSolo")||"null");if(s&&typeof s.stage==="number")st=s;}catch(e){}
+const save=()=>{try{localStorage.setItem("eclipseSolo",JSON.stringify(st))}catch(e){}};
 const $=id=>document.getElementById(id);
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -188,15 +190,14 @@ const fmt=ms=>{const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padSt
 setInterval(()=>{if(st.start)$("tTime").textContent=fmt((st.end||Date.now())-st.start)},500);
 
 const intro=()=>`<section class="panel"><span class="tag">미션 브리핑</span><h2>천문대에 갇혔다!</h2>
-<p class="story">일식 관측을 하러 온 천문대. 갑자기 정전이 되며 모든 문이 잠겼다. 문마다 일식과 월식에 관한 장치가 있고, 장치를 풀어야 다음 문이 열린다. 두 사람이 힘을 모아 5개의 문을 열고 탈출하자!</p>
-<div class="roles">${ROLES.map((r,i)=>`<div class="role"><b>${r}</b><span>문마다 ${i+1}번 카드를 맡아요</span></div>`).join('')}</div>
-<ol class="rules"><li>문마다 카드 4장이 있어요. <b>자기 번호 카드만</b> 열어서 모둠원에게 <b>말로</b> 설명해요.</li><li>두 사람의 정보를 합쳐야 암호를 알 수 있어요.</li><li>막히면 힌트를 쓸 수 있지만, 힌트 사용 횟수가 기록돼요.</li><li>교과서 256~259쪽을 참고해도 좋아요.</li></ol>
-<div class="lock"><input id="nm" maxlength="12" placeholder="모둠 이름" style="letter-spacing:0;text-transform:none;font-size:20px"><button class="btn" id="go" type="button">탐사 시작</button></div></section>`;
+<p class="story">일식 관측을 하러 온 천문대. 갑자기 정전이 되며 모든 문이 잠겼다. 문마다 일식과 월식에 관한 장치가 있고, 장치를 풀어야 다음 문이 열린다. 혼자서 단서를 모두 읽고 5개의 문을 열어 탈출하자!</p>
+
+<ol class="rules"><li>문마다 단서 쪽지 4장이 있어요. <b>4장을 모두</b> 읽고 정보를 합쳐야 암호를 알 수 있어요.</li><li>쪽지 중 하나에는 암호를 입력하는 규칙이 적혀 있어요.</li><li>막히면 힌트를 쓸 수 있지만, 힌트 사용 횟수가 기록돼요.</li><li>교과서 256~259쪽을 참고해도 좋아요.</li></ol>
+<div class="lock"><input id="nm" maxlength="20" placeholder="이름 (예: 3반 12번 김하늘)" style="letter-spacing:0;text-transform:none;font-size:20px"><button class="btn" id="go" type="button">탐사 시작</button></div></section>`;
 
 const stage=i=>{const s=S[i],sh=st.shown[i]||0;return `<section class="panel"><span class="tag">${s.tag} / 5</span><h2>${s.t}</h2><p class="story">${s.story}</p>
 <div class="device">${typeof s.dev==="function"?s.dev():s.dev}</div>
-<div class="cards">${ROLES.map((r,j)=>`<button class="cbtn" type="button" data-c="${j}" aria-pressed="false"><b>${j+1}번 카드</b><small>${r}만 열기</small></button>`).join('')}</div>
-<div class="cardbox empty" id="cb" aria-live="polite">자기 번호 카드를 눌러 내용을 확인하고, 모둠원에게 말로 알려 주세요.</div>
+<div class="cards">${s.c.map(c=>`<div class="note"><h3>${c[0]}</h3>${c[1]}</div>`).join('')}</div>
 <form class="lock" id="lk"><input id="code" autocomplete="off" inputmode="${i===4?'text':'numeric'}" placeholder="${s.ph}" aria-label="암호 입력"><button class="btn" type="submit">문 열기</button></form>
 <div class="msg" id="msg" role="status"></div>
 <div class="hints"><button class="btn ghost" id="hb" type="button" ${sh>=2?'disabled':''}>힌트 보기 (${sh}/2)</button></div>
@@ -205,7 +206,7 @@ const stage=i=>{const s=S[i],sh=st.shown[i]||0;return `<section class="panel"><s
 const win=()=>`<section class="panel" style="text-align:center"><span class="tag">ESCAPE!</span><h2 style="font-size:clamp(34px,6vw,52px);color:var(--sun)">탈출 성공!</h2>
 <p class="story">달이 태양을 완전히 가린 순간, 마지막 문이 열렸다. 그림자의 비밀을 모두 풀어냈어요.</p>
 <div class="big">${fmt(st.end-st.start)}</div>
-<p style="color:var(--mute)">모둠 <b style="color:var(--ink)">${esc(st.name)}</b> · 힌트 ${st.hints}회 · 틀린 시도 ${st.wrong}회</p>
+<p style="color:var(--mute)">탐사대원 <b style="color:var(--ink)">${esc(st.name)}</b> · 힌트 ${st.hints}회 · 틀린 시도 ${st.wrong}회</p>
 <p style="color:var(--mute);margin-top:18px">선생님께 이 화면을 보여 주세요.</p></section>`;
 
 const render=()=>{
@@ -213,16 +214,9 @@ const render=()=>{
   if(!st.start)$("tTime").textContent="00:00";
   drawProg();
   const m=$("main");
-  if(st.stage<0){m.innerHTML=intro();$("go").onclick=()=>{st.name=($("nm").value.trim()||"우리 모둠");st.stage=0;st.start=Date.now();st.end=0;save();render()};return}
+  if(st.stage<0){m.innerHTML=intro();$("go").onclick=()=>{st.name=($("nm").value.trim()||"탐사대원");st.stage=0;st.start=Date.now();st.end=0;save();render()};return}
   if(st.stage>=5){m.innerHTML=win();return}
   const i=st.stage;m.innerHTML=stage(i);
-  m.querySelectorAll(".cbtn").forEach(b=>b.onclick=()=>{
-    const j=+b.dataset.c,open=b.getAttribute("aria-pressed")==="true";
-    m.querySelectorAll(".cbtn").forEach(x=>x.setAttribute("aria-pressed","false"));
-    const cb=$("cb");
-    if(open){cb.className="cardbox empty";cb.innerHTML="자기 번호 카드를 눌러 내용을 확인하고, 모둠원에게 말로 알려 주세요.";return}
-    b.setAttribute("aria-pressed","true");cb.className="cardbox";cb.innerHTML=`<h3>${j+1}번 대원 카드</h3>`+PAIR[i][j].map(k=>`<h4>${S[i].c[k][0]}</h4>${S[i].c[k][1]}`).join('<hr>');
-  });
   $("hb").onclick=()=>{const sh=st.shown[i]||0;if(sh>=2)return;st.shown[i]=sh+1;st.hints++;save();render();};
   $("lk").onsubmit=e=>{e.preventDefault();
     const v=$("code").value.toUpperCase().replace(/[^0-9A-Z]/g,""),msg=$("msg");
