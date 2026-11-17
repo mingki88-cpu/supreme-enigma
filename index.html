@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우주 탐사 오디세이: 태양계의 비밀 (중1 과학 고급버전)</title>
+    <title>우주 탐사 오디세이: 태양계의 비밀 (1인 활동)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome icons CDN -->
@@ -43,6 +43,11 @@
             color: #f1f5f9;
             overflow-x: hidden;
             user-select: none;
+            -webkit-user-select: none;
+        }
+        input, select, textarea {
+            user-select: text;
+            -webkit-user-select: text;
         }
         
         .neon-glow-blue {
@@ -121,13 +126,10 @@
         <header id="hud-header" class="hidden cyber-glass rounded-xl p-4 mb-4 flex flex-wrap justify-between items-center gap-4 transition-all duration-300">
             <div class="flex items-center space-x-3">
                 <div class="bg-sky-950/80 border border-sky-500 rounded-lg p-2.5 text-center min-w-[120px]">
-                    <span class="text-xs text-sky-400 block font-orbitron">EXPLORER TEAM</span>
-                    <span id="hud-team-name" class="font-bold text-sm md:text-base text-sky-200 truncate max-w-[140px] block">태양계 탐사대</span>
+                    <span class="text-xs text-sky-400 block font-orbitron">EXPLORER</span>
+                    <span id="hud-team-name" class="font-bold text-sm md:text-base text-sky-200 truncate max-w-[160px] block">탐사 대원</span>
                 </div>
-                <div class="hidden md:flex flex-col text-xs text-gray-400">
-                    <span class="text-gray-400">탐사 대원:</span>
-                    <span id="hud-members-list" class="text-sky-300 font-medium">대원1, 대원2, 대원3, 대원4</span>
-                </div>
+                
             </div>
 
             <!-- Timer Display -->
@@ -184,7 +186,7 @@
                     <ul class="space-y-2.5 text-xs md:text-sm text-gray-300">
                         <li class="flex items-start gap-2">
                             <span class="text-sky-400 font-bold">•</span>
-                            <span><strong>4인 1모둠</strong> 심화 협동 탐사 미션입니다. 정확한 질문 분석과 토론이 필요합니다.</span>
+                            <span><strong>1인 개인</strong> 심화 탐사 미션입니다. 문제를 꼼꼼히 읽고 스스로 분석해야 합니다.</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <span class="text-sky-400 font-bold">•</span>
@@ -202,38 +204,20 @@
                 </div>
 
                 <!-- Team Form -->
-                <form id="form-setup" onsubmit="startGame(event)" class="space-y-4">
+                <div id="form-setup" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-sky-300 mb-1">
-                            <i class="fa-solid fa-users text-sky-400 mr-1"></i> 탐사 모둠 이름 (4인 모둠)
+                            <i class="fa-solid fa-user-astronaut text-sky-400 mr-1"></i> 탐사 대원 이름
                         </label>
-                        <input type="text" id="input-team-name" required placeholder="예: 은하수 탐사대" 
+                        <input type="text" id="input-team-name" required maxlength="20" placeholder="예: 3반 12번 김하늘" 
                             class="w-full bg-slate-900 border border-sky-500/50 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 text-sm">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-1">대원 1 (탐사대장)</label>
-                            <input type="text" id="member-1" required placeholder="이름 입력" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-400 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-1">대원 2 (천문분석관)</label>
-                            <input type="text" id="member-2" required placeholder="이름 입력" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-400 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-1">대원 3 (항법조작관)</label>
-                            <input type="text" id="member-3" required placeholder="이름 입력" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-400 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-1">대원 4 (통신기록관)</label>
-                            <input type="text" id="member-4" required placeholder="이름 입력" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-400 focus:outline-none">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full py-4 mt-2 bg-gradient-to-r from-sky-500 via-indigo-500 to-amber-500 hover:from-sky-400 hover:to-amber-400 text-slate-950 font-black text-lg rounded-xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0 font-orbitron tracking-wider flex items-center justify-center gap-2">
+                    <p id="name-warn" class="hidden text-xs text-amber-300">이름을 입력해 주세요.</p>
+                    <button type="button" onclick="startGame(event)" class="w-full py-4 mt-2 bg-gradient-to-r from-sky-500 via-indigo-500 to-amber-500 hover:from-sky-400 hover:to-amber-400 text-slate-950 font-black text-lg rounded-xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0 font-orbitron tracking-wider flex items-center justify-center gap-2">
                         <i class="fa-solid fa-rocket"></i> 탐사 미션 개시 (LAUNCH MISSION)
                     </button>
-                </form>
+                </div>
             </div>
         </main>
 
@@ -248,7 +232,7 @@
             <div class="cyber-glass rounded-2xl p-6 text-center border border-emerald-500/50 neon-glow-green">
                 <i class="fa-solid fa-trophy text-5xl text-amber-400 mb-3 animate-bounce"></i>
                 <h1 class="text-3xl md:text-5xl font-black text-emerald-300 font-orbitron mb-2">MISSION ACCOMPLISHED!</h1>
-                <p class="text-gray-200 text-sm md:text-base">축하합니다! 대원 모두의 협동으로 태양계 심화 탐사 미션을 성공적으로 완수했습니다!</p>
+                <p class="text-gray-200 text-sm md:text-base">축하합니다! 혼자의 힘으로 태양계 심화 탐사 미션을 성공적으로 완수했습니다!</p>
                 
                 <div class="mt-6 inline-flex flex-wrap items-center justify-center gap-4 bg-slate-900/90 border border-emerald-500/40 px-6 py-3 rounded-xl">
                     <div>
@@ -290,8 +274,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-300">
                     <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
-                        <p><strong class="text-sky-400">모둠명:</strong> <span id="cert-team-name" class="text-white font-bold"></span></p>
-                        <p><strong class="text-sky-400">탐사 대원:</strong> <span id="cert-members" class="text-white"></span></p>
+                        <p><strong class="text-sky-400">탐사 대원:</strong> <span id="cert-team-name" class="text-white font-bold"></span></p>
                         <p><strong class="text-sky-400">탐구 단원:</strong> 중학교 1학년 과학 - [태양계]</p>
                         <p><strong class="text-sky-400">수료 일자:</strong> <span id="cert-date" class="text-white"></span></p>
                     </div>
@@ -309,7 +292,7 @@
 
                 <div class="mt-6 border-t border-slate-700 pt-6">
                     <h3 class="text-base font-bold text-sky-300 mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-file-invoice"></i> 모둠 핵심 개념 학습 요약 리포트
+                        <i class="fa-solid fa-file-invoice"></i> 핵심 개념 학습 요약 리포트
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                         <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
@@ -409,6 +392,20 @@
     </div>
 
     <script>
+        /* Answer check (정답은 원래 값을 알 수 없는 형태로만 저장) */
+        const LOCKS = ["1rz7euvd8e2","1dowpwgr8z","1hja528g4nq","20njfe4jrtk","3qx2m2g7b3"];
+        function cyrb53(str, seed = 0) {
+            let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+            for (let i = 0, ch; i < str.length; i++) { ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507); h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+            return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+        }
+        function unlock(stage, parts) {
+            return cyrb53('odyssey' + stage + ':' + parts.join('|'), 29) === LOCKS[stage - 1];
+        }
+        const normCode = v => v.toUpperCase().replace(/\s+/g, '');
+
         /* State management */
         const gameState = {
             teamName: '',
@@ -570,25 +567,20 @@
         }
 
         function startGame(e) {
-            e.preventDefault();
+            if (e && e.preventDefault) e.preventDefault();
             playSound('click');
 
             const teamNameInput = document.getElementById('input-team-name').value.trim();
-            const m1 = document.getElementById('member-1').value.trim();
-            const m2 = document.getElementById('member-2').value.trim();
-            const m3 = document.getElementById('member-3').value.trim();
-            const m4 = document.getElementById('member-4').value.trim();
-
-            if (!teamNameInput || !m1 || !m2 || !m3 || !m4) {
-                alert('모둠 이름과 4명의 대원 이름을 모두 입력해주세요!');
+            if (!teamNameInput) {
+                document.getElementById('name-warn').classList.remove('hidden');
+                document.getElementById('input-team-name').focus();
                 return;
             }
 
             gameState.teamName = teamNameInput;
-            gameState.members = [m1, m2, m3, m4];
+            gameState.members = [teamNameInput];
 
             document.getElementById('hud-team-name').textContent = gameState.teamName;
-            document.getElementById('hud-members-list').textContent = gameState.members.join(', ');
             
             document.getElementById('screen-setup').classList.add('hidden');
             document.getElementById('hud-header').classList.remove('hidden');
@@ -597,6 +589,16 @@
             startTimer();
             loadStage(1);
         }
+
+        document.getElementById('input-team-name').addEventListener('keydown', ev => {
+            if (ev.key === 'Enter') startGame(ev);
+        });
+        document.addEventListener('keydown', ev => {
+            if (ev.key !== 'Enter' || !ev.target || ev.target.tagName !== 'INPUT') return;
+            const id = ev.target.id;
+            const map = {'s1-answer-input': checkStage1, 's2-answer-input': checkStage2, 's3-answer-input': checkStage3, 's4-answer-input': checkStage4, 's5-master-code': checkStage5};
+            if (map[id]) { ev.preventDefault(); map[id](); }
+        });
 
         function loadStage(stageNum) {
             gameState.currentStage = stageNum;
@@ -737,8 +739,8 @@
             const d = document.getElementById('s1-select-d').value;
             const inputVal = document.getElementById('s1-answer-input').value.trim();
 
-            if (a === '항성' && b === '행성' && c === '위성' && d === '혜성' && inputVal === '1835') {
-                showFeedback('1단계 탐사 승인 성공! [항성, 행성, 위성, 혜성] 천체 분류 검증 완료.', true);
+            if (unlock(1, [a, b, c, d, normCode(inputVal)])) {
+                showFeedback('1단계 탐사 승인 성공! 천체 분류 검증 완료.', true);
                 gameState.stageCompleted[0] = true;
                 setTimeout(() => loadStage(2), 1200);
             } else {
@@ -809,7 +811,7 @@
 
                             <div class="p-3 bg-slate-950 rounded border border-slate-800 text-xs space-y-2">
                                 <div class="text-gray-300">
-                                    <strong>[질문 A]</strong> 지구형 행성은 목성형 행성에 비해 <strong>평균 밀도</strong>가 ( <strong>크다</strong> / 작다 ).
+                                    <strong>[질문 A]</strong> 지구형 행성은 목성형 행성에 비해 <strong>평균 밀도</strong>가 ( 크다 / 작다 ).
                                 </div>
                                 <div class="text-gray-300">
                                     <strong>[질문 B]</strong> 목성형 행성만 가진 공통적인 특징으로 옳은 번호는?
@@ -869,15 +871,13 @@
         function checkStage2() {
             const inputVal = document.getElementById('s2-answer-input').value.trim();
 
-            const isEarthTypeCorrect = s2Planets['수성'] === '지구형' && s2Planets['금성'] === '지구형' && s2Planets['지구'] === '지구형' && s2Planets['화성'] === '지구형';
-            const isJupiterTypeCorrect = s2Planets['목성'] === '목성형' && s2Planets['토성'] === '목성형' && s2Planets['천왕성'] === '목성형' && s2Planets['해왕성'] === '목성형';
-
-            if (isEarthTypeCorrect && isJupiterTypeCorrect && inputVal === '344') {
-                showFeedback('분류 성공! (수,금,지,화=지구형 / 목,토,천,해=목성형) 및 물리량 특징 확인 완료!', true);
+            const order = ['수성','금성','지구','화성','목성','토성','천왕성','해왕성'];
+            if (unlock(2, [order.map(p => s2Planets[p]).join(','), normCode(inputVal)])) {
+                showFeedback('분류 성공! 행성 분류와 물리량 특징 확인 완료!', true);
                 gameState.stageCompleted[1] = true;
                 setTimeout(() => loadStage(3), 1200);
             } else {
-                showFeedback('분류 오류! 8개 행성 지정 상태 및 [질문 B 번호(3) + 지구형(4) + 목성형(4)] 암호를 다시 확인하세요.', false);
+                showFeedback('분류 오류! 8개 행성의 지정 상태와 2차 암호를 다시 확인하세요.', false);
             }
         }
 
@@ -963,7 +963,7 @@
 
                             <div class="pt-2">
                                 <label class="block text-xs font-bold text-amber-300 mb-1">
-                                    3차 승인 코드 입력 (태양의 영문 'SUN' + 흑점 주기 수치 '11')
+                                    3차 승인 코드 입력 ([태양의 영어 이름] + [흑점 수가 많아졌다 적어지는 주기(년)])
                                 </label>
                                 <div class="flex gap-2">
                                     <input type="text" id="s3-answer-input" placeholder="코드 입력" 
@@ -999,12 +999,12 @@
             const q3 = document.getElementById('s3-q3').value;
             const inputVal = document.getElementById('s3-answer-input').value.trim();
 
-            if (q1 === '흑점' && q2 === '채층' && q3 === '플레어' && inputVal.toUpperCase() === 'SUN11') {
-                showFeedback('승인 성공! 태양의 표면(흑점) 및 대기/활동(채층, 플레어) 현상 분석 완수!', true);
+            if (unlock(3, [q1, q2, q3, normCode(inputVal)])) {
+                showFeedback('승인 성공! 태양의 표면 및 대기/활동 현상 분석 완수!', true);
                 gameState.stageCompleted[2] = true;
                 setTimeout(() => loadStage(4), 1200);
             } else {
-                showFeedback('분석 오류! 태양 현상 선택(흑점, 채층, 플레어) 및 승인 코드(SUN11)를 확인하세요.', false);
+                showFeedback('분석 오류! 태양 현상 선택과 승인 코드를 다시 확인하세요.', false);
             }
         }
 
@@ -1093,8 +1093,8 @@
             const pd = document.getElementById('s4-planet-d').value;
             const inputVal = document.getElementById('s4-answer-input').value.trim();
 
-            if (pa === '금성' && pb === '화성' && pc === '토성' && pd === '천왕성' && inputVal.toUpperCase() === 'VENUS') {
-                showFeedback('행성 분석 성공! (금성-화성-토성-천왕성) 프로파일 승인 완료.', true);
+            if (unlock(4, [pa, pb, pc, pd, normCode(inputVal)])) {
+                showFeedback('행성 분석 성공! 프로파일 승인 완료.', true);
                 gameState.stageCompleted[3] = true;
                 setTimeout(() => loadStage(5), 1200);
             } else {
@@ -1182,13 +1182,13 @@
             const c3 = document.getElementById('s5-c3').value;
             const code = document.getElementById('s5-master-code').value.trim();
 
-            if (c1 === '8' && c2 === '4' && c3 === 'B' && code.toUpperCase() === '84B1') {
+            if (unlock(5, [c1, c2, c3, normCode(code)])) {
                 stopTimer();
                 playSound('victory');
                 gameState.stageCompleted[4] = true;
                 finishGame();
             } else {
-                showFeedback('생환 코드 오류! [조건1~3] 선택 항목과 마스터 4자리 암호(84B1)를 다시 확인하세요.', false);
+                showFeedback('생환 코드 오류! [조건 1~3] 선택 항목과 마스터 4자리 암호를 다시 확인하세요.', false);
             }
         }
 
@@ -1197,17 +1197,17 @@
             1: [
                 "태양은 스스로 빛을 내는 '항성'입니다.",
                 "행성은 태양 주위를 도는 8개 천체이며, 달은 행성 주위를 도는 '위성'입니다.",
-                "암호 공식: 자리1(1개) + 자리2(8개) + 자리3(달1+화성2=3) + 자리4(태양반대방향=5) ➔ 1835"
+                "자리 3: 지구의 위성은 1개, 화성의 위성은 2개입니다. 자리 4: 혜성의 꼬리는 태양 반대 방향으로 생깁니다."
             ],
             2: [
                 "지구형 행성은 수, 금, 지, 화 4개입니다. 목성형 행성은 목, 토, 천, 해 4개입니다.",
-                "지구형 행성은 평균 밀도가 크고, 목성형 행성은 고리와 위성이 많습니다(3번).",
-                "질문 B 정답(3) + 지구형(4) + 목성형(4) ➔ 344"
+                "지구형 행성은 평균 밀도가 크고, 목성형 행성은 고리가 있고 위성이 많습니다.",
+                "암호는 [질문 B 번호] 다음에 [지구형 행성 수], [목성형 행성 수]를 이어 쓴 3자리 숫자입니다."
             ],
             3: [
                 "흑점은 주변보다 온도가 낮아 어둡게 보입니다.",
                 "채층은 붉은색 얇은 대기층이며, 플레어는 흑점 인근의 대폭발 현상입니다.",
-                "승인 코드는 'SUN11' 입니다 (SUN + 흑점 주기 11년)."
+                "흑점 수는 약 11년을 주기로 많아졌다 적어졌다 합니다. 태양의 영어 이름 뒤에 이 숫자를 붙이세요."
             ],
             4: [
                 "로그 A: 두꺼운 이산화탄소 대기와 강한 온실효과 ➔ '금성'",
@@ -1217,7 +1217,7 @@
             5: [
                 "조건 1: 태양계 행성은 총 8개입니다.",
                 "조건 2: 지구형 행성은 총 4개입니다.",
-                "조건 3: 흑점은 주변보다 온도가 낮아서 어둡게 보입니다 [B]. ➔ 조합 암호: 84B1"
+                "조건 3: 흑점은 주변보다 온도가 낮아서 어둡게 보입니다. 마지막 자리에는 '1'을 붙이세요."
             ]
         };
 
@@ -1282,7 +1282,6 @@
             document.getElementById('victory-grade').textContent = grade;
 
             document.getElementById('cert-team-name').textContent = gameState.teamName;
-            document.getElementById('cert-members').textContent = gameState.members.join(', ');
             
             const today = new Date();
             document.getElementById('cert-date').textContent = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
