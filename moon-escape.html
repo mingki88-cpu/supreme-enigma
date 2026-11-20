@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>달 관측소 탈출</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 밤의 관측소에 홀로 갇힌 모험, 긴장감 있지만 친근하게 — 중1 개인 활동용
+   IDEA: 낡은 천문 관측소의 잠긴 방 다섯 개와 열쇠 조각
+   PICTURE: 각 방마다 직접 조작하는 달 모형·궤도도·전등 모형·식 배치도가 화면의 중심
+   COLOUR and TYPE: 깊은 청록 밤하늘 + 달빛 크림 + 산호색 자물쇠 강조 / Do Hyeon 제목, Noto Sans KR 본문
+   LAYOUT: 상단 상태 바(시간·점수·열쇠), 방 탭, 큰 퍼즐 카드 한 장, 600px 아래는 한 줄로 쌓기 */
+:root{color-scheme:dark;--bg:#0a1a20;--panel:#112830;--line:#24434d;--ink:#eef3ef;--mute:#9db5b6;--moon:#f4e7bf;--dark:#1b2f36;--acc:#ff7a59;--ok:#5fd3a6}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#16343d 0,transparent 60%),var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+h1,h2,h3{font-family:"Do Hyeon","Noto Sans KR",sans-serif;font-weight:400;line-height:1.1;margin:0;text-wrap:balance}
+h1{font-size:clamp(34px,6vw,52px)}h2{font-size:clamp(26px,4vw,34px)}h3{font-size:20px}
+.wrap{max-width:980px;margin:0 auto;padding:16px max(4vw,14px) 48px}
+.bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;padding:10px 0 14px;border-bottom:1px solid var(--line)}
+.brand{font-family:"Do Hyeon";font-size:22px;color:var(--moon)}
+.stat{display:flex;gap:16px;flex-wrap:wrap;color:var(--mute);font-size:14px}.stat b{color:var(--ink);font-variant-numeric:tabular-nums}
+.inv{display:flex;gap:6px}.inv span{width:30px;height:36px;border:1.5px dashed var(--line);border-radius:8px;display:grid;place-items:center;font:18px "Do Hyeon";color:var(--mute)}
+.inv span.got{border:1.5px solid var(--moon);background:#1d3a40;color:var(--moon)}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+.tab{flex:1 1 120px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--mute);font:15px "Noto Sans KR";cursor:pointer;padding:6px 10px}
+.tab.on{border-color:var(--moon);color:var(--ink);background:#1a3a42}.tab.done{color:var(--ok)}.tab:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:clamp(18px,3vw,32px);box-shadow:0 20px 50px -30px #000}
+.lead{color:var(--mute);margin:8px 0 18px;max-width:64ch}
+.btn{min-height:46px;padding:10px 22px;border-radius:12px;border:0;background:var(--acc);color:#1a0d08;font:700 16px "Noto Sans KR";cursor:pointer}
+.btn.ghost{background:transparent;color:var(--moon);border:1px solid var(--line);font-weight:500}
+.btn.sm{min-height:40px;padding:6px 14px;font-size:14px}
+.btn:focus-visible,.tab:focus-visible,.pick:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.slot:focus-visible,.ox button:focus-visible{outline:3px solid var(--moon);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px}
+.msg{margin-top:14px;padding:12px 16px;border-radius:12px;display:none}.msg.show{display:block}
+.msg.bad{background:#3a1d18;border:1px solid #7a3a2c}.msg.good{background:#123a30;border:1px solid #2f7a5f}.msg.hint{background:#2c2a18;border:1px solid #6b6230}
+.slots{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.slot,.pick{background:#0d2228;border:1.5px solid var(--line);border-radius:12px;padding:8px 4px 6px;color:var(--mute);cursor:pointer;display:grid;justify-items:center;gap:2px;font:14px "Noto Sans KR";min-height:44px}
+.slot{aspect-ratio:3/4;align-content:center}.slot.fill{border-color:var(--moon)}
+.pool{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;min-height:96px}.pool .pick{width:88px}
+.lit{fill:var(--moon)}.dk{fill:var(--dark);stroke:#3f5a63;stroke-width:1.5}
+.pick.sel{border-color:var(--acc);background:#2a2420}
+.grid2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px;align-items:center}
+.fig svg{width:100%;height:auto;display:block}
+.q{margin:12px 0}.q label,.q .lb{display:block;font-weight:500;margin-bottom:6px}
+select,input,textarea{width:100%;min-height:46px;font:16px "Noto Sans KR";background:#0d2228;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:8px 12px}
+textarea{min-height:180px;line-height:1.5}
+.opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.opts .pick span{font-size:13px}
+.qb{padding:16px 0;border-top:1px solid var(--line)}.qb:first-of-type{border-top:0}
+.ox{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.ox div{display:flex;gap:6px}.ox button{width:52px;height:46px;border-radius:10px;border:1.5px solid var(--line);background:#0d2228;color:var(--mute);font:22px "Do Hyeon";cursor:pointer}
+.ox button.sel{border-color:var(--acc);color:var(--ink);background:#2a2420}
+.hero{display:flex;justify-content:center;gap:clamp(4px,1.5vw,14px);margin:22px 0 8px;flex-wrap:wrap}
+.hero svg{width:clamp(38px,9vw,74px);height:auto}
+.score{font:clamp(56px,12vw,96px)/1 "Do Hyeon";color:var(--moon);font-variant-numeric:tabular-nums}
+.bd{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:16px}
+.bd div{background:#0d2228;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;color:var(--mute)}.bd b{display:block;color:var(--ink);font-size:20px;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;margin-top:16px;font-size:15px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}th{color:var(--mute);font-weight:500}td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.show{margin-top:16px;padding:clamp(16px,3vw,28px);border-radius:16px;background:#0d2228;border:2px solid var(--moon);text-align:center}
+.show .tag{margin:0 0 8px;color:var(--acc);font-weight:700}.show .who{font:clamp(28px,5vw,40px)/1.2 "Do Hyeon";margin-bottom:4px}
+.note{font-size:13px;color:var(--mute);margin-top:12px}
+.link{background:none;border:0;color:var(--mute);text-decoration:underline;font:14px "Noto Sans KR";cursor:pointer;padding:8px 0;min-height:44px}
+@keyframes pop{from{transform:scale(.95);opacity:0}to{transform:none;opacity:1}}.msg.show{animation:pop .25s ease}
+@media (prefers-reduced-motion:reduce){.msg.show{animation:none}}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}.slots{grid-template-columns:repeat(3,minmax(0,1fr))}.opts{grid-template-columns:repeat(2,minmax(0,1fr))}
+table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:6.5em;margin-inline-start:-7em;color:var(--mute)}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <div class="brand">달 관측소 탈출</div>
+    <div class="stat"><span id="who"></span><span>시간 <b id="time">00:00</b></span><span>예상 점수 <b id="live">1000</b></span></div>
+    <div class="inv" id="inv" aria-label="모은 열쇠 조각"></div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <main id="room"></main>
+</div>
+<script>
+{
+const ORDER=['삭','초승달','상현달','망','하현달','그믐달'];
+const SHOW={'삭':'삭','초승달':'초승달','상현달':'상현달','망':'망(보름달)','하현달':'하현달','그믐달':'그믐달'};
+const PH={'삭':0,'초승달':45,'상현달':90,'망':180,'하현달':270,'그믐달':315};
+const POSQ={'삭':'삭일 때','초승달':'초승달이 보일 때','상현달':'상현일 때','망':'망일 때','하현달':'하현일 때','그믐달':'그믐달이 보일 때'};
+const ROOMS=['① 관측 일지','② 궤도 지도실','③ 모형 실험실','④ 원리 기록실','⑤ 그림자 방'];
+const KEYS='달의위상열';
+const HINTS=[
+ '우리나라에서 보면 달은 오른쪽부터 밝아지며 차오르고, 오른쪽부터 어두워지며 이지러져요. 보이지 않는 달(삭)에서 시작하세요!',
+ '햇빛은 오른쪽에서 와요. 달이 태양 쪽(지구와 태양 사이)에 있으면 삭, 반대쪽이면 망이에요. 달은 시계 반대 방향으로 공전하니까 삭 → 상현 → 망 → 하현 순서로 돌아요.',
+ '전등은 태양, 공은 달, 관찰자의 머리는 지구예요. 공에서 전등을 향한 쪽 절반이 밝아요. 관찰자 쪽에서 그 밝은 부분이 얼마나, 어느 쪽에 보일지 생각해 보세요.',
+ '달의 위상 변화는 지구 그림자 때문이 아니에요! 달이 공전하면서 지구에서 보이는 달의 밝은 부분이 달라지기 때문이에요.',
+ '일식은 태양-달-지구, 월식은 태양-지구-달 순서로 일직선에 놓일 때 일어나요. 이때 달의 위치가 각각 어떤 위상인지 떠올려 보세요.'];
+const OXPOOL=[
+ ['달은 스스로 빛을 내지 못하고, 햇빛을 반사하여 밝게 보인다.',1],
+ ['달의 위상이 변하는 까닭은 달이 지구 주위를 공전하면서 태양, 지구, 달의 위치 관계가 달라지기 때문이다.',1],
+ ['지구의 그림자가 달을 가리기 때문에 달의 모양이 날마다 바뀐다.',0],
+ ['달은 위치와 관계없이 항상 태양을 향한 쪽 절반이 햇빛을 받아 밝다.',1],
+ ['상현일 때 달은 태양과 지구 사이에 있다.',0],
+ ['망일 때 태양, 지구, 달은 이 순서로 거의 일직선에 놓인다.',1],
+ ['삭일 때는 달의 밝은 면이 지구를 향하지 않아 달이 보이지 않는다.',1],
+ ['상현달은 왼쪽 반원이 밝게 보인다.',0],
+ ['북극 위에서 내려다보면 달은 지구 주위를 시계 방향으로 공전한다.',0],
+ ['하현일 때 지구에서 보면 달과 태양은 직각을 이루는 방향에 있다.',1]];
+const ECQ=[
+ {q:'일식은 지구의 어느 지역에서 볼 수 있을까?',a:'달의 그림자가 생기는 지역에서만',o:['달의 그림자가 생기는 지역에서만','밤이 된 지역 어디에서나','지구의 모든 지역에서']},
+ {q:'월식은 지구의 어느 지역에서 볼 수 있을까?',a:'달이 보이는 밤인 지역 어디에서나',o:['달이 보이는 밤인 지역 어디에서나','달의 그림자가 생기는 지역에서만','낮인 지역에서만']},
+ {q:'태양이 달에 완전히 가려지는 현상은?',a:'개기 일식',o:['개기 일식','부분 일식','개기 월식','부분 월식']},
+ {q:'달의 일부만 지구의 그림자에 가려지는 현상은?',a:'부분 월식',o:['부분 월식','개기 월식','부분 일식','개기 일식']},
+ {q:'개기 월식 때 달은 어떻게 보일까?',a:'붉은빛을 띤다',o:['붉은빛을 띤다','완전히 사라져 보이지 않는다','더 밝게 빛난다']},
+ {q:'일식이 진행될 때 태양은 어느 쪽부터 가려질까?',a:'오른쪽(서쪽)',o:['오른쪽(서쪽)','왼쪽(동쪽)','위쪽']},
+ {q:'월식이 진행될 때 달은 어느 쪽부터 가려질까?',a:'왼쪽(동쪽)',o:['왼쪽(동쪽)','오른쪽(서쪽)','아래쪽']}];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const fmt=s=>String(s/60|0).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+const norm=s=>s.trim().replace(/\s+/g,' ');
+let S,name='';
+
+function moonPath(t,r,cx,cy){
+  const k=Math.abs(Math.cos(t*Math.PI/180))*r;
+  if(t<180)return `M${cx} ${cy-r}A${r} ${r} 0 0 1 ${cx} ${cy+r}A${k} ${r} 0 0 ${t<90?0:1} ${cx} ${cy-r}Z`;
+  return `M${cx} ${cy-r}A${r} ${r} 0 0 0 ${cx} ${cy+r}A${k} ${r} 0 0 ${t>270?1:0} ${cx} ${cy-r}Z`;
+}
+function moon(t,size=64){
+  const lit=t===0?'':t===180?'<circle cx="50" cy="50" r="44" class="lit"/>':`<path d="${moonPath(t,44,50,50)}" class="lit"/>`;
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true"><circle cx="50" cy="50" r="44" class="dk" ${t===0?'stroke-dasharray="5 5"':''}/>${lit}</svg>`;
+}
+function optSet(t){const set=new Set([t]);set.add((360-t)%360);for(const x of shuf([0,45,90,135,180,225,270,315]))if(set.size<4)set.add(x);return shuf([...set])}
+
+function newGame(){
+  const ang=[0,45,90,135,180,225,270,315],L='ABCDEFGH',off=Math.random()*8|0,dir=Math.random()<.5?1:-1,letters={};
+  ang.forEach((a,i)=>letters[a]=L[((i*dir+off)%8+8)%8]);
+  const eclipse=Math.random()<.5?'일식':'월식';
+  S={view:'intro',room:0,cleared:[0,0,0,0,0],hint:[0,0,0,0,0],wrong:[0,0,0,0,0],start:null,end:null,
+    r1:{pool:shuf(ORDER),slots:Array(6).fill(null)},
+    r2:{letters,qs:shuf(ORDER).slice(0,3)},
+    r3:{qs:shuf([0,45,90,180,270,315]).slice(0,2).map(t=>({t,opts:optSet(t)})),sel:[null,null]},
+    r4:{qs:shuf(OXPOOL).slice(0,5),sel:Array(5).fill(null)},
+    r5:{eclipse,fact:(()=>{const f=shuf(ECQ)[0];return{...f,o:shuf(f.o)}})()}};
+  render();
+}
+const roomScore=i=>S.cleared[i]||S.view==='game'?Math.max(80,200-30*S.wrong[i]-(S.hint[i]?50:0)):0;
+const elapsed=()=>S.start?Math.round(((S.end||Date.now())-S.start)/1000):0;
+const timeBonus=sec=>Math.max(0,100-Math.floor(Math.max(0,sec-180)/6));
+function totals(){const rooms=[0,1,2,3,4].map(i=>Math.max(80,200-30*S.wrong[i]-(S.hint[i]?50:0)));const sec=elapsed(),tb=timeBonus(sec);return{rooms,sec,tb,total:rooms.reduce((a,b)=>a+b,0)+tb}}
+function unlocked(i){return i===0||S.cleared[i-1]}
+function render(){
+  const g=S.view==='game';
+  $('#who').innerHTML=name&&S.view!=='intro'?`<b>${esc(name)}</b>`:'';
+  $('#live').textContent=S.view==='intro'?'1100':totals().total;
+  $('#inv').innerHTML=KEYS.split('').map((x,i)=>`<span class="${S.cleared[i]?'got':''}" title="${ROOMS[i]} 열쇠 조각">${S.cleared[i]?x:'?'}</span>`).join('');
+  $('#tabs').innerHTML=g?ROOMS.map((r,i)=>`<button class="tab ${i===S.room?'on':''} ${S.cleared[i]?'done':''}" data-tab="${i}" ${unlocked(i)?'':'disabled'}>${S.cleared[i]?'✓ ':unlocked(i)?'':'🔒 '}${r}</button>`).join(''):'';
+  $('#room').innerHTML=S.view==='intro'?intro():S.view==='end'?endView():[r1,r2,r3,r4,r5][S.room]();
+}
+const msgBox='<div class="msg" id="msg" role="status"></div>';
+const ctrl=label=>`<div class="row"><button class="btn" data-act="check">${label}</button><button class="btn ghost" data-act="hint">힌트 보기 (−50점)</button></div>${msgBox}`;
+function say(cls,html){const m=$('#msg');m.className='msg show '+cls;m.innerHTML=html}
+
+function intro(){
+  return `<section class="card"><h1>달 관측소에 갇혔다!</h1>
+  <div class="hero">${[0,45,90,135,180,225,270,315].map(t=>moon(t,74)).join('')}</div>
+  <p class="lead">혼자 남아 관측소를 둘러보던 밤, 정전과 함께 모든 문이 잠겼어요. 관측소장의 메모에는 이렇게 적혀 있어요. <b>“달의 위상과 그림자의 비밀을 아는 자만 나갈 수 있다.”</b><br>
+  다섯 개의 방에서 퍼즐을 풀어 열쇠 조각 다섯 개를 모으면 탈출이에요. 모든 문제는 <b>우리나라(북반구)에서 본 달</b>을 기준으로 해요.</p>
+  <div class="bd"><div>방마다 기본<b>200점</b></div><div>오답 1회<b>−30점</b></div><div>힌트 사용<b>−50점</b></div><div>시간 보너스<b>최대 100점</b></div></div>
+  <p class="note">방마다 최소 80점은 보장돼요. 3분 안에 탈출하면 시간 보너스 100점, 이후 6초마다 1점씩 줄어요. 만점은 1100점이에요.</p>
+  <div class="q" style="max-width:360px;margin-top:20px"><label for="nm">학번과 이름</label><input id="nm" maxlength="20" placeholder="예: 10315 김하늘" value="${esc(name)}" autocomplete="off"></div>
+  <div class="row"><button class="btn" data-act="start">탈출 시작하기</button></div>${msgBox}</section>`;
+}
+function r1(){
+  const {pool,slots}=S.r1,used=new Set(slots.filter(Boolean));
+  return `<section class="card"><h2>① 관측 일지 — 사라진 순서</h2>
+  <p class="lead">찢어진 관측 일지에 한 달 동안 그린 달 그림이 흩어져 있어요. <b>보이지 않는 달(삭)부터 시작해</b> 달의 모양이 바뀌는 순서대로 칸에 넣으세요. 칸을 누르면 다시 빠져요.</p>
+  <div class="slots">${slots.map((n,i)=>`<button class="slot ${n?'fill':''}" data-slot="${i}" aria-label="${i+1}번 칸">${n?moon(PH[n],56):''}<span>${i+1}</span></button>`).join('')}</div>
+  <div class="pool">${pool.filter(n=>!used.has(n)).map(n=>`<button class="pick" data-card="${n}" aria-label="달 그림">${moon(PH[n],60)}</button>`).join('')||'<span class="note">모든 그림을 배치했어요. 확인해 보세요!</span>'}</div>
+  ${ctrl('일지 맞춰 보기')}</section>`;
+}
+function orbitSVG(){
+  const cx=180,cy=170,R=112,L=S.r2.letters;
+  let s=`<svg viewBox="0 0 400 340" role="img" aria-label="지구 주위를 도는 달의 위치 A부터 H">`;
+  for(let i=0;i<7;i++){const y=50+i*40;s+=`<line x1="392" y1="${y}" x2="340" y2="${y}" stroke="#f4e7bf" stroke-opacity=".55" stroke-width="2"/><path d="M340 ${y}l8 -5v10z" fill="#f4e7bf" fill-opacity=".55"/>`}
+  s+=`<text x="366" y="28" fill="#f4e7bf" font-size="13" text-anchor="middle">햇빛</text>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#3f5a63" stroke-dasharray="4 6"/>`;
+  s+=`<path d="M${cx-R*0.71} ${cy-R*0.71-14}A${R+14} ${R+14} 0 0 0 ${cx-R-14} ${cy-10}" fill="none" stroke="#ff7a59" stroke-width="2"/><path d="M${cx-R-14} ${cy-2}l-6 -12h12z" fill="#ff7a59"/>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="26" fill="#1c4f6b"/><path d="M${cx} ${cy-26}A26 26 0 0 1 ${cx} ${cy+26}Z" fill="#4fa3c7"/><text x="${cx}" y="${cy+46}" fill="#9db5b6" font-size="13" text-anchor="middle">지구</text>`;
+  for(const a of [0,45,90,135,180,225,270,315]){
+    const r=a*Math.PI/180,x=cx+R*Math.cos(r),y=cy-R*Math.sin(r),lx=cx+(R+30)*Math.cos(r),ly=cy-(R+30)*Math.sin(r);
+    s+=`<circle cx="${x}" cy="${y}" r="14" class="dk"/><path d="M${x} ${y-14}A14 14 0 0 1 ${x} ${y+14}Z" class="lit"/>`;
+    s+=`<text x="${lx}" y="${ly+7}" fill="#eef3ef" font-size="20" font-family="Do Hyeon" text-anchor="middle">${L[a]}</text>`;
+  }
+  return s+'</svg>';
+}
+function r2(){
+  const opts='<option value="">선택</option>'+'ABCDEFGH'.split('').map(c=>`<option>${c}</option>`).join('');
+  return `<section class="card"><h2>② 궤도 지도실 — 달은 어디에?</h2>
+  <p class="lead">벽에 걸린 지도는 <b>북극 위에서 내려다본</b> 지구와 달이에요. 달은 화살표처럼 시계 반대 방향(서→동)으로 공전해요. 각 경우에 달의 위치를 고르세요.</p>
+  <div class="grid2"><div class="fig">${orbitSVG()}</div><div>${S.r2.qs.map((n,i)=>`<div class="q"><label for="q2_${i}">${POSQ[n]} 달의 위치</label><select id="q2_${i}">${opts}</select></div>`).join('')}</div></div>
+  ${ctrl('자물쇠 돌리기')}</section>`;
+}
+function modelSVG(t){
+  const cx=150,cy=130,R=88,r=t*Math.PI/180,x=cx+R*Math.cos(r),y=cy-R*Math.sin(r);
+  return `<svg viewBox="0 0 360 260" role="img" aria-label="전등, 관찰자, 공의 배치를 위에서 본 그림">
+  <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#3f5a63" stroke-dasharray="3 6"/>
+  <circle cx="318" cy="${cy}" r="30" fill="#ffd97a" opacity=".18"/><circle cx="318" cy="${cy}" r="16" fill="#ffd97a"/>
+  <text x="318" y="${cy+46}" fill="#f4e7bf" font-size="13" text-anchor="middle">전등(태양)</text>
+  <line x1="${cx}" y1="${cy}" x2="${cx+(x-cx)*0.72}" y2="${cy+(y-cy)*0.72}" stroke="#ff7a59" stroke-width="2" stroke-dasharray="5 4"/>
+  <circle cx="${cx}" cy="${cy}" r="20" fill="#2f6f86"/><circle cx="${cx}" cy="${cy}" r="20" fill="none" stroke="#9fd0e2" stroke-width="1.5"/>
+  <text x="${cx}" y="${cy+40}" fill="#9db5b6" font-size="13" text-anchor="middle">관찰자 머리(지구)</text>
+  <circle cx="${x}" cy="${y}" r="16" class="dk"/><path d="M${x} ${y-16}A16 16 0 0 1 ${x} ${y+16}Z" class="lit"/>
+  <text x="${x}" y="${y-24}" fill="#eef3ef" font-size="14" text-anchor="middle">공(달)</text></svg>`;
+}
+function r3(){
+  return `<section class="card"><h2>③ 모형 실험실 — 공은 어떻게 보일까?</h2>
+  <p class="lead">어두운 실험실에 전등과 공이 놓여 있어요. <b>위에서 내려다본 배치</b>를 보고, 관찰자가 점선 방향으로 공을 바라볼 때 보이는 공의 모양을 고르세요.</p>
+  ${S.r3.qs.map((q,i)=>`<div class="qb grid2"><div class="fig">${modelSVG(q.t)}</div><div><span class="lb" style="font-weight:500">관찰자에게 보이는 공의 모양 (${i+1})</span><div class="opts" style="margin-top:10px">${q.opts.map(t=>`<button class="pick ${S.r3.sel[i]===t?'sel':''}" data-r3="${i}" data-t="${t}" aria-label="공 모양 보기">${moon(t,64)}${t===0?'<span>안 보임</span>':''}</button>`).join('')}</div></div></div>`).join('')}
+  ${ctrl('관찰 기록 제출')}</section>`;
+}
+function r4(){
+  return `<section class="card"><h2>④ 원리 기록실 — 진짜 기록을 가려라</h2>
+  <p class="lead">관측소장의 연구 노트에 틀린 문장이 몰래 섞여 있어요. 각 문장이 맞으면 <b>O</b>, 틀리면 <b>X</b>를 고르세요.</p>
+  ${S.r4.qs.map((q,i)=>`<div class="ox"><span>${i+1}. ${q[0]}</span><div role="group" aria-label="${i+1}번 O X 선택"><button class="${S.r4.sel[i]===1?'sel':''}" data-ox="${i}" data-v="1">O</button><button class="${S.r4.sel[i]===0?'sel':''}" data-ox="${i}" data-v="0">X</button></div></div>`).join('')}
+  ${ctrl('노트 정리하기')}</section>`;
+}
+function eclipseSVG(kind){
+  const sol=kind==='일식',mx=sol?222:338,ex=sol?336:222;
+  const shadow=sol?`<path d="M${mx} 72L336 92V108L${mx} 88Z" fill="#000" opacity=".55"/>`:`<path d="M222 56L370 70V130L222 144Z" fill="#000" opacity=".5"/>`;
+  return `<svg viewBox="0 0 400 200" role="img" aria-label="태양, 지구, 달이 일직선에 놓인 그림">
+  <circle cx="20" cy="100" r="80" fill="#ffd97a"/><circle cx="20" cy="100" r="96" fill="#ffd97a" opacity=".15"/>
+  <text x="44" y="190" fill="#f4e7bf" font-size="14">태양</text>
+  ${sol?shadow:''}
+  <circle cx="${ex}" cy="100" r="44" fill="#1c4f6b"/><path d="M${ex} 56A44 44 0 0 0 ${ex} 144Z" fill="#4fa3c7"/>
+  <circle cx="${mx}" cy="100" r="12" class="dk"/><path d="M${mx} 88A12 12 0 0 0 ${mx} 112Z" class="lit"/>
+  ${sol?'':shadow}
+  <text x="${ex}" y="170" fill="#9db5b6" font-size="14" text-anchor="middle">지구</text><text x="${mx}" y="${sol?66:66}" fill="#eef3ef" font-size="14" text-anchor="middle">달</text>
+  <text x="200" y="22" fill="#9db5b6" font-size="12" text-anchor="middle">크기와 거리는 실제 비율과 달라요</text></svg>`;
+}
+function r5(){
+  const f=S.r5.fact;
+  const sel=(id,arr)=>`<select id="${id}"><option value="">선택</option>${arr.map(x=>`<option>${x}</option>`).join('')}</select>`;
+  return `<section class="card"><h2>⑤ 그림자 방 — 마지막 문</h2>
+  <p class="lead">마지막 문에 태양, 지구, 달이 일직선으로 놓인 그림이 새겨져 있어요. 세 질문에 모두 답하면 문이 열려요.</p>
+  <div class="grid2"><div class="fig">${eclipseSVG(S.r5.eclipse)}</div><div>
+  <div class="q"><label for="q5_0">그림과 같을 때 일어날 수 있는 현상은?</label>${sel('q5_0',['일식','월식'])}</div>
+  <div class="q"><label for="q5_1">이때 달의 위상은?</label>${sel('q5_1',['삭','상현','망','하현'])}</div>
+  <div class="q"><label for="q5_2">${f.q}</label>${sel('q5_2',f.o)}</div></div></div>
+  ${ctrl('마지막 문 열기')}</section>`;
+}
+function endView(){
+  const t=totals(),done=new Date(S.end),stamp=`${done.getMonth()+1}월 ${done.getDate()}일 ${String(done.getHours()).padStart(2,'0')}:${String(done.getMinutes()).padStart(2,'0')}`;
+  const rows=[['삭',0,'보이지 않음','태양 - 달 - 지구가 일직선 (달이 태양 쪽)'],['초승달',45,'오른쪽이 가늘게 밝음','삭과 상현 사이'],['상현달',90,'오른쪽 반원','지구에서 볼 때 달과 태양이 직각'],['망(보름달)',180,'둥근 원','태양 - 지구 - 달이 일직선'],['하현달',270,'왼쪽 반원','지구에서 볼 때 달과 태양이 직각'],['그믐달',315,'왼쪽이 가늘게 밝음','하현과 삭 사이']];
+  return `<section class="card"><h1>탈출 성공!</h1>
+  <div class="show"><p class="tag">이 화면을 선생님께 보여 주세요</p>
+  <div class="who">${esc(name)}</div>
+  <div class="score">${t.total}<span style="font-size:.35em;color:var(--mute)"> / 1100점</span></div>
+  <p class="note" style="margin:6px 0 0">탈출 시각 ${stamp} · 걸린 시간 ${fmt(t.sec)}</p></div>
+  <div class="bd">${t.rooms.map((s,i)=>`<div>${ROOMS[i]}<b>${s}점</b></div>`).join('')}<div>시간 보너스 (${fmt(t.sec)})<b>${t.tb}점</b></div><div>오답 / 힌트<b>${S.wrong.reduce((a,b)=>a+b,0)}회 / ${S.hint.reduce((a,b)=>a+b,0)}회</b></div></div>
+  <h3 style="margin-top:28px">관측소장의 정리 노트</h3>
+  <table class="stack"><thead><tr><th>위상</th><th>모양</th><th>밝은 부분</th><th>태양·지구·달의 위치</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td>${r[0]}</td><td>${moon(r[1],40)}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</tbody></table>
+  <table class="stack"><thead><tr><th>현상</th><th>배열 순서</th><th>달의 위상</th><th>볼 수 있는 곳</th></tr></thead><tbody>
+  <tr><td>일식</td><td>태양 - 달 - 지구</td><td>삭</td><td>달의 그림자가 생기는 지역</td></tr>
+  <tr><td>월식</td><td>태양 - 지구 - 달</td><td>망</td><td>달이 보이는 밤인 지역 어디에서나</td></tr></tbody></table>
+  <p class="note">달은 스스로 빛을 내지 못하고 햇빛을 반사해요. 달이 지구 주위를 공전하면서 태양·지구·달의 위치 관계가 달라지면, 지구에서 보이는 달의 밝은 부분의 모양이 바뀌어요.</p>
+  <div class="row"><button class="btn" data-act="restart">다시 도전하기 (문제 새로 섞기)</button></div></section>`;
+}
+function clear(i,txt){
+  S.cleared[i]=1;
+  if(i===4){S.end=Date.now();S.view='end';render();window.scrollTo({top:0,behavior:'smooth'});return}
+  render();
+  say('good',`<b>철컥! 문이 열렸어요.</b> ${txt}<br>열쇠 조각 <b>“${KEYS[i]}”</b> 획득! 이 방 점수 <b>${roomScore(i)}점</b> <button class="btn sm" style="margin-left:8px" data-act="next">다음 방으로 →</button>`);
+}
+function miss(html){S.wrong[S.room]++;$('#live').textContent=totals().total;say('bad',html+' <span class="note">(−30점)</span>')}
+function check(){
+  const i=S.room;
+  if(S.cleared[i])return say('good','이미 연 방이에요. 위의 탭에서 다음 방으로 이동하세요.');
+  if(i===0){
+    const s=S.r1.slots;if(s.includes(null))return say('bad','아직 빈 칸이 있어요. 그림 6장을 모두 넣어 주세요.');
+    const ok=s.filter((n,k)=>n===ORDER[k]).length;
+    return ok===6?clear(0,'삭 → 초승달 → 상현달 → 망(보름달) → 하현달 → 그믐달 → 다시 삭!'):miss(`일지가 맞지 않아요. 6칸 중 <b>${ok}칸</b>만 제자리예요.`);
+  }
+  if(i===1){
+    const a=S.r2.qs.map((n,k)=>$('#q2_'+k).value);if(a.includes(''))return say('bad','세 칸을 모두 골라 주세요.');
+    const ok=S.r2.qs.filter((n,k)=>a[k]===S.r2.letters[PH[n]]).length;
+    return ok===3?clear(1,'달이 태양 쪽에 있으면 삭, 반대쪽이면 망, 그 사이 직각인 곳이 상현과 하현이에요.'):miss(`자물쇠가 꿈쩍하지 않아요. 3개 중 <b>${ok}개</b>가 맞았어요.`);
+  }
+  if(i===2){
+    if(S.r3.sel.includes(null))return say('bad','두 배치 모두 공의 모양을 골라 주세요.');
+    const ok=S.r3.qs.filter((q,k)=>S.r3.sel[k]===q.t).length;
+    return ok===2?clear(2,'공은 늘 전등 쪽 절반이 밝지만, 관찰자에게 보이는 밝은 부분은 위치에 따라 달라져요. 이것이 달의 위상 변화예요.'):miss(`기록이 맞지 않아요. 2개 중 <b>${ok}개</b>가 맞았어요. 좌우가 뒤집힌 모양을 조심하세요!`);
+  }
+  if(i===3){
+    if(S.r4.sel.includes(null))return say('bad','다섯 문장 모두 O 또는 X를 골라 주세요.');
+    const ok=S.r4.qs.filter((q,k)=>S.r4.sel[k]===q[1]).length;
+    return ok===5?clear(3,'달의 위상 변화는 지구 그림자가 아니라, 공전에 따른 태양·지구·달의 위치 관계 변화 때문이에요.'):miss(`노트가 정리되지 않아요. 5개 중 <b>${ok}개</b>가 맞았어요.`);
+  }
+  const a=[0,1,2].map(k=>$('#q5_'+k).value);if(a.includes(''))return say('bad','세 질문 모두 골라 주세요.');
+  const ans=[S.r5.eclipse,S.r5.eclipse==='일식'?'삭':'망',S.r5.fact.a],ok=a.filter((x,k)=>x===ans[k]).length;
+  ok===3?clear(4):miss(`문이 열리지 않아요. 3개 중 <b>${ok}개</b>가 맞았어요.`);
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const d=b.dataset;
+  if(d.act==='start'){const v=norm($('#nm').value);if(v.length<2)return say('bad','학번과 이름을 입력해 주세요.');name=v;S.start=Date.now();S.view='game';S.room=0;render()}
+  else if(d.act==='restart'){newGame()}
+  else if(d.act==='next'){S.room=Math.min(4,S.room+1);render();window.scrollTo({top:0,behavior:'smooth'})}
+  else if(d.act==='check')check();
+  else if(d.act==='hint'){if(!S.hint[S.room]&&!S.cleared[S.room]){S.hint[S.room]=1;$('#live').textContent=totals().total}say('hint','힌트: '+HINTS[S.room])}
+  else if(d.tab!==undefined){S.room=+d.tab;render()}
+  else if(d.card){const s=S.r1.slots,k=s.indexOf(null);if(k>-1){s[k]=d.card;render()}}
+  else if(d.slot!==undefined){S.r1.slots[+d.slot]=null;render()}
+  else if(d.r3!==undefined){S.r3.sel[+d.r3]=+d.t;render()}
+  else if(d.ox!==undefined){S.r4.sel[+d.ox]=+d.v;render()}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='nm')$('[data-act="start"]').click()});
+setInterval(()=>{if(S&&S.view==='game'){$('#time').textContent=fmt(elapsed());$('#live').textContent=totals().total}},1000);
+newGame();
+}
+</script>
+</body>
+</html>
