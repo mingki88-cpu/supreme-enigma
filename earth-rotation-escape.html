@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>천문대 탈출 게임</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 밤 천문대에 갇힌 긴장감 + 친절한 과학 선생님의 힌트
+   IDEA: 돔 천문대의 다섯 자물쇠 — 풀 때마다 '그래도 지구는 돈다'의 글자 조각을 얻는다
+   PICTURE: 북극성을 중심으로 도는 별 궤적, 각 자물쇠마다 직접 만지는 하늘 그림
+   COLOUR and TYPE: 깊은 밤 보라-남색 바탕, 별빛 흰색, 산호색 강조, 하늘색 보조 / Do Hyeon + Noto Sans KR
+   LAYOUT: 상단 상태줄(시간·자물쇠·조각), 그 아래 자물쇠 카드 — 그림과 퍼즐을 나란히, 좁으면 위아래 */
+:root{color-scheme:dark;--bg:#0e0c26;--bg2:#17143a;--card:#1d1946;--line:#3a3478;--ink:#eef0ff;--mute:#b4b3dc;--acc:#ff7a59;--sky:#7cc4ff;--ok:#8be3b4;--bad:#ff8a9a}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#2a1f63 0,transparent 60%),var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+h1,h2,h3{font-family:"Do Hyeon","Noto Sans KR",sans-serif;font-weight:400;line-height:1.1;margin:0;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 max(4vw,14px)}
+.top{position:sticky;top:0;z-index:5;background:rgba(14,12,38,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding-block:10px}
+.top h1{font-size:24px;margin-right:auto}
+.stat{display:flex;gap:6px;align-items:center;color:var(--mute);font-size:14px;white-space:nowrap}
+.stat b{color:var(--ink);font-size:17px;font-variant-numeric:tabular-nums}
+.locks{display:flex;gap:5px}
+.locks i{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:13px;color:var(--mute)}
+.locks i.on{border-color:var(--acc);color:var(--acc)}
+.locks i.done{background:var(--acc);border-color:var(--acc);color:#2a0e05;font-family:"Do Hyeon"}
+main{padding-block:24px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:clamp(18px,3vw,32px);box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.badge{display:inline-block;background:var(--acc);color:#2a0e05;font-weight:700;font-size:13px;padding:3px 10px;border-radius:99px;margin-bottom:10px}
+.card h2{font-size:clamp(28px,4vw,40px);margin-bottom:8px}
+.story{color:var(--mute);margin:0 0 18px;max-width:70ch}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(16px,3vw,32px);align-items:start}
+.grid.one{grid-template-columns:minmax(0,1fr)}
+.fig-box{background:#0a0820;border:1px solid var(--line);border-radius:14px;padding:8px}
+.fig-box svg{display:block;width:100%;height:auto}
+.cap{font-size:13px;color:var(--mute);text-align:center;margin:6px 0 2px}
+.q{background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.q p{margin:0 0 4px}
+.q .n{color:var(--sky);font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.btn{background:var(--acc);color:#2a0e05;border:0;border-radius:12px;padding:12px 22px;min-height:48px;font-weight:700;font-size:17px}
+.btn:hover{filter:brightness(1.08)}
+.ghost{background:transparent;border:1.5px solid var(--line);border-radius:12px;padding:10px 18px;min-height:48px;color:var(--mute)}
+.ghost:hover{border-color:var(--sky);color:var(--ink)}
+.msg{min-height:26px;margin-top:12px;font-weight:500}
+.msg.bad{color:var(--bad)}.msg.ok{color:var(--ok)}
+.hint{border-left:3px solid var(--sky);background:rgba(124,196,255,.08);padding:10px 14px;border-radius:0 10px 10px 0;margin-top:10px;font-size:15px}
+.explain{margin-top:18px;border:1.5px solid var(--ok);border-radius:14px;padding:16px 18px;background:rgba(139,227,180,.07)}
+.explain h3{font-size:22px;color:var(--ok);margin-bottom:6px}
+.explain ul{margin:6px 0 0;padding-left:20px}
+.piece{display:inline-grid;place-items:center;width:46px;height:46px;border-radius:10px;background:var(--acc);color:#2a0e05;font:28px "Do Hyeon";vertical-align:middle;margin:0 6px}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+/* stage 1 dials */
+.dials{display:flex;gap:12px;justify-content:center;margin:6px 0}
+.dial{display:flex;flex-direction:column;align-items:center;gap:4px}
+.dial button{width:52px;height:40px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2)}
+.dial output{width:64px;height:76px;display:grid;place-items:center;font:44px "Do Hyeon";background:#0a0820;border:2px solid var(--acc);border-radius:12px;font-variant-numeric:tabular-nums}
+/* stage 2 panels */
+.panels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.panel{background:#0a0820;border:1px solid var(--line);border-radius:14px;padding:8px;text-align:center}
+.panel svg{width:100%;height:auto;display:block}
+.panel h3{font-size:20px;margin:4px 0}
+.arrows{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px}
+.arrows button{min-height:44px;border-radius:9px;border:1.5px solid var(--line);background:var(--bg2);font-size:20px}
+.arrows button.sel{background:var(--sky);color:#06203a;border-color:var(--sky)}
+/* choice buttons */
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choices button{min-width:64px;min-height:48px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg2);font-size:18px;padding:0 16px}
+.choices button.sel{background:var(--sky);color:#06203a;border-color:var(--sky);font-weight:700}
+.num{width:96px;min-height:48px;font:22px "Do Hyeon";text-align:center;border-radius:12px;border:2px solid var(--acc);background:#0a0820;color:var(--ink)}
+/* stage 4 */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{min-height:44px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg2);padding:0 16px}
+.tabs button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.mk{cursor:pointer}
+.mk circle{fill:#17143a;stroke:#5b54a8;stroke-width:2}
+.mk:hover circle{stroke:var(--sky)}
+.mk.a1 circle{fill:var(--acc);stroke:var(--acc)}.mk.a2 circle{fill:var(--sky);stroke:var(--sky)}
+.mk text{font:17px "Do Hyeon";fill:var(--ink);pointer-events:none}
+.mk.a1 text,.mk.a2 text{fill:#170a20}
+/* stage 5 */
+.ox{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ox li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--bg2);border-radius:12px;padding:12px 14px}
+.ox .choices button{min-width:52px}
+/* final */
+.tiles{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:16px 0}
+.tiles button{width:64px;height:64px;border-radius:14px;border:0;background:var(--acc);color:#2a0e05;font:36px "Do Hyeon"}
+.tiles button:disabled{opacity:.25}
+.slots{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.slots span{width:64px;height:64px;border-radius:14px;border:2px dashed var(--line);display:grid;place-items:center;font:36px "Do Hyeon"}
+/* intro */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(18px,4vw,48px);align-items:center}
+.hero h2{font-size:clamp(40px,6vw,64px);margin-bottom:14px}
+.hero p{color:var(--mute);max-width:56ch}
+.rules{margin:14px 0;padding-left:20px;color:var(--mute)}
+.field{display:flex;flex-direction:column;gap:6px;margin-top:16px;max-width:320px}
+.field input{min-height:48px;font-size:16px;border-radius:12px;border:1.5px solid var(--line);background:#0a0820;color:var(--ink);padding:0 14px}
+.spin{transform-origin:200px 120px;animation:rot 120s linear infinite}
+@keyframes rot{to{transform:rotate(-360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}.shake{animation:none}}
+.cert{text-align:center;border:2px solid var(--acc);border-radius:18px;padding:24px;background:linear-gradient(180deg,#241d58,#1d1946)}
+.cert h2{font-size:clamp(34px,5vw,52px);color:var(--acc)}
+.cert dl{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 28px;margin:16px 0}
+.cert dt{color:var(--mute);font-size:14px}.cert dd{margin:0;font:28px "Do Hyeon"}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:20px}
+.notes div{background:var(--bg2);border-radius:12px;padding:14px 16px}
+.notes h3{font-size:20px;color:var(--sky);margin-bottom:4px}
+.notes p{margin:0;font-size:15px}
+@media(max-width:860px){.grid,.hero{grid-template-columns:minmax(0,1fr)}.panels{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.panels{grid-template-columns:minmax(0,1fr)}.top h1{font-size:20px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <h1>천문대 탈출</h1>
+  <div class="stat">자물쇠 <span class="locks" id="locks"></span></div>
+  <div class="stat">시간 <b id="time">00:00</b></div>
+  <div class="stat">힌트 <b id="hc">0</b></div>
+  <div class="stat">조각 <b id="inv">—</b></div>
+</div></header>
+<main class="wrap"><div id="stage"></div></main>
+<script>
+{
+const $=s=>document.querySelector(s);
+const PIECES=['지','구','는','돈','다'];
+const KEY='escape-earth-rotation-v1';
+let S={stage:0,name:'',start:0,pen:0,hints:0,wrong:0,shown:{},end:0};
+try{const v=JSON.parse(localStorage.getItem(KEY)||'null');if(v&&typeof v.stage==='number')S=Object.assign(S,v)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const P=(cx,cy,r,d)=>{const a=d*Math.PI/180;return[+(cx+r*Math.cos(a)).toFixed(1),+(cy-r*Math.sin(a)).toFixed(1)]};
+const arc=(cx,cy,r,a1,a2)=>{const p=P(cx,cy,r,a1),q=P(cx,cy,r,a2);return`M${p} A${r},${r} 0 ${a2-a1>180?1:0} 0 ${q}`};
+const fmt=ms=>{const s=Math.max(0,Math.floor(ms/1000));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const elapsed=()=>S.start?((S.end||Date.now())-S.start+S.pen*1000):0;
+let seed=7;const rnd=()=>(seed=(seed*9301+49297)%233280)/233280;
+const starfield=(w,h,n)=>{seed=11;let o='';for(let i=0;i<n;i++)o+=`<circle cx="${(rnd()*w).toFixed(0)}" cy="${(rnd()*h).toFixed(0)}" r="${(rnd()*1.2+.3).toFixed(1)}" fill="#fff" opacity="${(rnd()*.5+.3).toFixed(2)}"/>`;return o};
+
+function status(){
+  $('#locks').innerHTML=[1,2,3,4,5].map(i=>`<i class="${S.stage>i?'done':S.stage===i?'on':''}">${S.stage>i?PIECES[i-1]:i}</i>`).join('');
+  $('#time').textContent=fmt(elapsed());
+  $('#hc').textContent=S.hints;
+  $('#inv').textContent=PIECES.slice(0,Math.max(0,Math.min(5,S.stage-1))).join(' ')||'—';
+}
+setInterval(()=>{if(S.stage>0&&!S.end)$('#time').textContent=fmt(elapsed())},500);
+
+/* ---------- 공통 틀 ---------- */
+const STAGES={};
+function frame(n,title,story,fig,puzzle,one){
+  return`<section class="card" id="card"><span class="badge">자물쇠 ${n} / 5</span><h2>${title}</h2><p class="story">${story}</p>
+  <div class="grid ${one?'one':''}">${fig?`<div class="fig-box">${fig}</div>`:''}<div class="puz">${puzzle}
+  <div class="row" id="ctl"><button class="btn" id="check">자물쇠 열기</button><button class="ghost" id="hint">힌트 보기 (+30초)</button></div>
+  <div class="msg" id="msg" role="status"></div><div id="hints"></div><div id="after"></div></div></div></section>`;
+}
+function wireCommon(n){
+  const st=STAGES[n];
+  const showHints=()=>{const k=S.shown[n]||0;$('#hints').innerHTML=st.hints.slice(0,k).map((h,i)=>`<div class="hint"><b>힌트 ${i+1}</b> · ${h}</div>`).join('');
+    $('#hint').textContent=k>=st.hints.length?'힌트를 모두 봤어요':'힌트 보기 (+30초)';};
+  showHints();
+  $('#hint').onclick=()=>{const k=S.shown[n]||0;if(k>=st.hints.length)return;S.shown[n]=k+1;S.hints++;S.pen+=30;save();status();showHints()};
+  $('#check').onclick=()=>{
+    const r=st.check();
+    const m=$('#msg');
+    if(r===true){m.className='msg ok';m.textContent='철컥! 자물쇠가 열렸다.';solved(n)}
+    else{S.wrong++;save();m.className='msg bad';m.textContent=r||'자물쇠가 꿈쩍도 하지 않는다. 다시 생각해 보자.';
+      const c=$('#card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake')}
+  };
+}
+function solved(n){
+  const st=STAGES[n];
+  $('#ctl').remove();
+  if(st.onSolved)st.onSolved();
+  $('#after').innerHTML=`<div class="explain"><h3>정리 노트</h3>${st.explain}</div>
+  <p style="margin-top:16px">금고 안에서 글자 조각을 찾았다! <span class="piece">${PIECES[n-1]}</span></p>
+  <div class="row"><button class="btn" id="next">${n<5?'다음 자물쇠로':'마지막 문으로'}</button></div>`;
+  S.stage=n+1;save();status();
+  $('#next').onclick=()=>{render();window.scrollTo({top:0,behavior:'smooth'})};
+  $('#next').focus({preventScroll:true});
+}
+
+/* ---------- 자물쇠 1: 자전 속도 ---------- */
+STAGES[1]={
+  title:'회전 금고의 숫자 자물쇠',
+  story:'돔 안쪽 벽에 지구 그림이 그려진 금고가 있다. 쪽지에 이렇게 적혀 있다. “지구가 도는 빠르기를 아는 자만이 열 수 있다.”',
+  fig(){let t='';for(let i=0;i<24;i++){const a=P(160,150,100,i*15),b=P(160,150,i%6?110:116,i*15);t+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#b4b3dc" stroke-width="${i%6?1.2:2.4}"/>`}
+    const w1=P(160,150,100,90),w2=P(160,150,100,105),lb=P(160,150,132,97.5);
+    return`<svg viewBox="0 0 320 300" role="img" aria-label="북극 위에서 내려다본 지구와 24개의 눈금">
+    <defs><radialGradient id="eg" cx=".4" cy=".35"><stop offset="0" stop-color="#5fb0ff"/><stop offset="1" stop-color="#1b3f8f"/></radialGradient></defs>
+    ${starfield(320,300,60)}
+    <circle cx="160" cy="150" r="100" fill="url(#eg)"/>
+    <path d="M160,150 L${w1} A100,100 0 0 0 ${w2} Z" fill="#ff7a59" opacity=".85"/>
+    ${t}<circle cx="160" cy="150" r="5" fill="#fff"/><text x="160" y="176" text-anchor="middle" font-size="14" fill="#fff">북극</text>
+    <text x="${lb[0]}" y="${lb[1]}" text-anchor="middle" font-size="15" fill="#ff7a59" font-weight="700">1시간</text>
+    <text x="160" y="290" text-anchor="middle" font-size="13" fill="#b4b3dc">눈금 24칸 = 하루(24시간)에 한 바퀴</text></svg>
+    <p class="cap">북극 위에서 내려다본 지구</p>`},
+  puzzle(){return`<div class="q"><p><span class="n">단서 ①</span> 지구가 1시간 동안 자전하는 각도(두 자리 수) → 앞의 두 칸</p></div>
+    <div class="q"><p><span class="n">단서 ②</span> 별이 일주 운동으로 60° 움직이는 데 걸리는 시간(한 자리 수, 시간) → 마지막 칸</p></div>
+    <div class="dials">${[0,1,2].map(i=>`<div class="dial"><button data-d="${i}" data-v="1" aria-label="${i+1}번째 숫자 올리기">▲</button><output id="d${i}">0</output><button data-d="${i}" data-v="-1" aria-label="${i+1}번째 숫자 내리기">▼</button></div>`).join('')}</div>`},
+  wire(){const d=[0,0,0];document.querySelectorAll('.dial button').forEach(b=>b.onclick=()=>{const i=+b.dataset.d;d[i]=(d[i]+ +b.dataset.v+10)%10;$('#d'+i).textContent=d[i]});this.val=()=>d.join('')},
+  check(){const v=this.val();if(v==='154')return true;if(v.slice(0,2)==='15')return'앞의 두 칸은 맞은 것 같다. 마지막 칸을 다시 계산해 보자.';return'번호가 틀렸다. 지구는 하루(24시간)에 360°를 돈다는 것을 떠올려 보자.'},
+  hints:['지구는 24시간 동안 360° 자전해요. 360 ÷ 24 = ?','1시간에 15°씩 움직인다면 60°는 15°의 몇 배일까요?'],
+  explain:`<ul><li>지구는 자전축을 중심으로 <b>하루에 한 바퀴(360°)</b> 서쪽에서 동쪽으로 자전한다.</li><li>그래서 1시간에 <b>15°</b>씩 돌고, 하늘의 별도 1시간에 약 15°씩 움직이는 것처럼 보인다.</li><li>60° ÷ 15°/시간 = <b>4시간</b> → 번호 154</li></ul>`
+};
+
+/* ---------- 자물쇠 2: 방향 자물쇠 ---------- */
+const ARW=['↗','↘','↖','↙','→','←','↺','↻'];
+const SKY=[
+ {d:'동쪽',l:'북',r:'남',ans:'↗',trail:()=>[0,1,2,3].map(i=>`<path d="M${18+i*34},100 L${58+i*34},38" />`).join('')},
+ {d:'남쪽',l:'동',r:'서',ans:'→',trail:()=>[0,1,2].map(i=>`<path d="M${12+i*10},100 Q80,${30+i*16} ${148-i*10},100" />`).join('')},
+ {d:'서쪽',l:'남',r:'북',ans:'↘',trail:()=>[0,1,2,3].map(i=>`<path d="M${18+i*34},38 L${58+i*34},100" />`).join('')},
+ {d:'북쪽',l:'서',r:'동',ans:'↺',trail:()=>[14,26,38].map(r=>`<path d="${arc(80,55,r,200,290)}" />`).join('')+'<circle cx="80" cy="55" r="2.5" fill="#fff" stroke="none"/>'}
+];
+STAGES[2]={
+  title:'네 개의 창문, 방향 자물쇠',
+  story:'돔에는 동·남·서·북쪽을 향한 창문이 하나씩 있다. 문에는 화살표 네 개를 맞추는 자물쇠가 걸려 있다. “각 창문에서 별이 움직이는 방향을 맞춰라.”',
+  fig(){return''},
+  puzzle(){return`<p style="margin:0 0 12px">각 창문 앞에 서서 하늘을 바라볼 때, <b>시간이 지나면 별이 어느 방향으로 움직이는지</b> 화살표를 고르세요. (창문 아래 글자는 왼쪽·오른쪽 방위)</p>
+    <div class="panels">${SKY.map((s,k)=>`<div class="panel"><h3>${s.d} 하늘</h3>
+    <svg viewBox="0 0 160 120" aria-label="${s.d} 하늘 창문"><rect width="160" height="120" rx="8" fill="#0d1440"/>${starfield(160,95,14)}
+    <g id="tr${k}" fill="none" stroke="#ffd36e" stroke-width="2" stroke-linecap="round" opacity="0">${s.trail()}</g>
+    <path d="M0,100 L160,100 L160,120 L0,120Z" fill="#1c3a2c"/><text x="6" y="115" font-size="11" fill="#cfe">${s.l}</text><text x="154" y="115" font-size="11" fill="#cfe" text-anchor="end">${s.r}</text></svg>
+    <div class="arrows" data-k="${k}">${ARW.map(a=>`<button data-a="${a}" aria-label="${a}">${a}</button>`).join('')}</div></div>`).join('')}</div>`},
+  wire(){const pick=[null,null,null,null];document.querySelectorAll('.arrows').forEach(g=>{const k=+g.dataset.k;g.querySelectorAll('button').forEach(b=>b.onclick=()=>{pick[k]=b.dataset.a;g.querySelectorAll('button').forEach(x=>x.classList.toggle('sel',x===b))})});this.pick=pick},
+  check(){if(this.pick.includes(null))return'아직 화살표를 고르지 않은 창문이 있다.';const c=this.pick.filter((p,i)=>p===SKY[i].ans).length;return c===4?true:`화살표 4개 중 ${c}개만 맞았다. 다시 확인해 보자.`},
+  onSolved(){SKY.forEach((s,k)=>{const g=$('#tr'+k);if(g)g.setAttribute('opacity','1')})},
+  hints:['별은 지구 자전과 반대 방향, 즉 동쪽에서 떠서 서쪽으로 지는 것처럼 보여요. 동쪽 하늘에서는 떠오르고, 서쪽 하늘에서는 져요.','남쪽을 바라보면 왼쪽이 동쪽, 오른쪽이 서쪽이에요. 북쪽 하늘의 별은 북극성을 중심으로 시계 반대 방향으로 돌아요.'],
+  explain:`<ul><li>지구가 <b>서→동</b>으로 자전하므로 별은 <b>동→서</b>로 움직이는 것처럼 보인다(일주 운동).</li><li>동쪽 하늘: 오른쪽 위로 비스듬히 떠오른다 ↗ · 남쪽 하늘: 동(왼쪽)에서 서(오른쪽)로 ↷ · 서쪽 하늘: 오른쪽 아래로 비스듬히 진다 ↘</li><li>북쪽 하늘: 북극성을 중심으로 <b>시계 반대 방향</b>으로 돈다 ↺ (창문에 노란 별 궤적이 나타났다!)</li></ul>`
+};
+
+/* ---------- 자물쇠 3: 별 궤적 사진 ---------- */
+STAGES[3]={
+  title:'관측 일지 속 별 궤적 사진',
+  story:'책상 위 관측 일지에 사진 한 장이 끼워져 있다. 북쪽 하늘을 향해 카메라를 고정하고 오랫동안 노출해 찍은 사진이다. 그런데 찍은 시간이 지워져 있다.',
+  fig(){const cx=170,cy=150;seed=3;let t='';
+    for(let i=0;i<26;i++){const r=24+rnd()*125,a=rnd()*360;t+=`<path d="${arc(cx,cy,r,a,a+45)}" stroke="#cfd6ff" stroke-width="${(rnd()*1.2+.8).toFixed(1)}" opacity="${(rnd()*.5+.4).toFixed(2)}"/>`}
+    const pa=200,pb=245,r1=P(cx,cy,140,pa),r2=P(cx,cy,140,pb);let ticks='';
+    for(let a=pa;a<=pb;a+=15){const u=P(cx,cy,54,a),v=P(cx,cy,66,a),w=P(cx,cy,82,a);ticks+=`<line x1="${u[0]}" y1="${u[1]}" x2="${v[0]}" y2="${v[1]}" stroke="#7cc4ff" stroke-width="2"/><text x="${w[0]}" y="${w[1]+4}" text-anchor="middle" font-size="12" fill="#7cc4ff" stroke="#070a24" stroke-width="3" paint-order="stroke">${a-pa}°</text>`}
+    const am=P(cx,cy,34,(pa+pb)/2);ticks+=`<text x="${am[0]}" y="${am[1]+5}" text-anchor="middle" font-size="15" fill="#ffd36e" font-family="Do Hyeon" stroke="#070a24" stroke-width="3" paint-order="stroke">45°</text>`;
+    const ga=P(cx,cy,88,60+45),da=P(cx,cy,128,320+45),ge=P(cx,cy,72,60+45),de=P(cx,cy,112,320+45);
+    return`<svg viewBox="0 0 340 300" role="img" aria-label="북쪽 하늘 별 궤적 사진"><rect width="340" height="300" fill="#070a24"/>
+    <g fill="none" stroke-linecap="round">${t}
+    <path d="${arc(cx,cy,72,60,105)}" stroke="#cfd6ff" stroke-width="1.6"/><path d="${arc(cx,cy,112,320,365)}" stroke="#cfd6ff" stroke-width="1.6"/>
+    <path d="${arc(cx,cy,118,pa,pb)}" stroke="#ff7a59" stroke-width="3.5"/>
+    <line x1="${cx}" y1="${cy}" x2="${r1[0]}" y2="${r1[1]}" stroke="#7cc4ff" stroke-dasharray="4 4"/><line x1="${cx}" y1="${cy}" x2="${r2[0]}" y2="${r2[1]}" stroke="#7cc4ff" stroke-dasharray="4 4"/>
+    <path d="${arc(cx,cy,60,pa,pb)}" stroke="#7cc4ff" stroke-width="1.5"/>${ticks}
+    <path d="${arc(cx,cy,3,0,40)}" stroke="#fff" stroke-width="3"/></g>
+    <circle cx="${cx}" cy="${cy}" r="2.6" fill="#fff"/>
+    <text x="${cx+10}" y="${cy-8}" font-size="16" fill="#fff" font-family="Do Hyeon">나</text>
+    <text x="${ge[0]-18}" y="${ge[1]}" font-size="16" fill="#fff" font-family="Do Hyeon">가</text>
+    <text x="${de[0]+8}" y="${de[1]+4}" font-size="16" fill="#fff" font-family="Do Hyeon">다</text>
+    <text x="34" y="222" font-size="14" fill="#ff7a59" font-family="Do Hyeon">궤적 P</text>
+    <path d="M0,262 Q60,248 110,258 T220,254 T340,258 L340,300 L0,300Z" fill="#0f2a20"/><text x="170" y="290" text-anchor="middle" font-size="13" fill="#cfe">북</text></svg>
+    <p class="cap">파란 점선 사이 각도 = 궤적 P의 중심각 (눈금 한 칸 = 15°)</p>`},
+  puzzle(){return`<div class="q"><p><span class="n">질문 ①</span> 궤적 P의 중심각을 보고, 이 사진을 몇 시간 동안 찍었는지 구하세요.</p>
+    <p style="margin-top:8px"><input class="num" id="hrs" type="number" inputmode="numeric" min="0" max="24" aria-label="노출 시간"> 시간</p></div>
+    <div class="q"><p><span class="n">질문 ②</span> 사진 속 ‘가, 나, 다’ 중 북극성은?</p><div class="choices" id="pol" style="margin-top:8px">${['가','나','다'].map(x=>`<button data-v="${x}">${x}</button>`).join('')}</div></div>`},
+  wire(){this.p=null;document.querySelectorAll('#pol button').forEach(b=>b.onclick=()=>{this.p=b.dataset.v;document.querySelectorAll('#pol button').forEach(x=>x.classList.toggle('sel',x===b))})},
+  check(){const h=+$('#hrs').value,okH=h===3,okP=this.p==='나';if(okH&&okP)return true;if(!$('#hrs').value||!this.p)return'두 질문에 모두 답해야 한다.';
+    return okH?'시간은 맞았다. 북극성을 다시 찾아보자.':okP?'북극성은 맞았다. 각도를 다시 재어 보자.':'둘 다 틀렸다. 눈금 한 칸이 몇 도인지 보자.'},
+  hints:['그림에 표시된 궤적 P의 중심각(노란 숫자)을 읽어 보세요.','별은 1시간에 15°씩 움직여요. 북극성은 지구 자전축의 연장선 근처에 있어서 거의 제자리에 있어요.'],
+  explain:`<ul><li>궤적 P의 중심각은 15° × 3칸 = <b>45°</b> → 45° ÷ 15°/시간 = <b>3시간</b> 동안 찍은 사진이다.</li><li>사진 속 모든 별의 궤적은 <b>중심각이 같다</b>. 같은 시간 동안 같은 각도로 돌기 때문이다.</li><li>북극성(나)은 자전축의 연장선 근처에 있어 거의 움직이지 않으며, 다른 별들은 북극성을 중심으로 원을 그린다.</li></ul>`
+};
+
+/* ---------- 자물쇠 4: 북두칠성 시계 ---------- */
+const POS=[[45,'ㅁ'],[0,'ㄹ'],[315,'ㅂ'],[270,'ㄷ'],[225,'ㅅ'],[180,'ㄴ'],[135,'ㅇ']];
+const DIP=[[-50,-10],[-34,-14],[-20,-10],[-6,-4],[-2,12],[20,14],[22,-4]];
+const dipper=(cx,cy,R,ang,cls)=>{const pts=DIP.map(([x,y])=>[cx+x+12,cy-R+y]);
+  return`<g transform="rotate(${-(ang-90)} ${cx} ${cy})" class="${cls}"><polyline points="${pts.map(p=>p.join(',')).join(' ')} ${pts[3].join(',')}" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".7"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.4" fill="currentColor"/>`).join('')}</g>`};
+STAGES[4]={
+  title:'북두칠성 시계',
+  story:'천체 망원경 받침대에 북쪽 하늘 원판이 붙어 있다. 오후 8시의 북두칠성 위치가 표시되어 있고, 둘레에 글자가 적혀 있다.',
+  fig(){return`<svg viewBox="0 0 360 360" role="img" aria-label="북쪽 하늘 원판과 북두칠성"><circle cx="180" cy="180" r="172" fill="#0d1440"/>${starfield(360,360,50)}
+    <circle cx="180" cy="180" r="105" fill="none" stroke="#3a3478" stroke-dasharray="3 6"/>
+    <g id="dg" style="color:#ffd36e">${dipper(180,180,105,90,'')}</g><g id="ghosts"></g>
+    <circle cx="180" cy="180" r="4" fill="#fff"/><text x="180" y="202" text-anchor="middle" font-size="13" fill="#fff">북극성</text>
+    <text x="180" y="46" text-anchor="middle" font-size="13" fill="#ffd36e">오후 8시</text>
+    ${POS.map(([a,l])=>{const p=P(180,180,148,a);return`<g class="mk" data-a="${a}" tabindex="0" role="button" aria-label="${l} 위치"><circle cx="${p[0]}" cy="${p[1]}" r="17"/><text x="${p[0]}" y="${p[1]+6}" text-anchor="middle">${l}</text></g>`}).join('')}
+    <text x="14" y="350" font-size="12" fill="#b4b3dc">북쪽 하늘을 바라본 모습</text></svg>`},
+  puzzle(){return`<div class="tabs" id="tabs"><button data-q="0" class="on">① 같은 날 밤 11시</button><button data-q="1">② 다음 날 새벽 2시</button></div>
+    <div class="q"><p id="qtext"></p></div><p id="picks" style="color:var(--mute);margin:0">원판 둘레의 글자를 눌러 고르세요.</p>`},
+  wire(){const ans=[null,null];let q=0;const qt=['오후 8시에 북두칠성이 그림의 위치에 있었다. <b>같은 날 밤 11시</b>에는 어느 글자 쪽에 있을까?','그렇다면 <b>다음 날 새벽 2시</b>에는 어느 글자 쪽에 있을까?'];
+    const upd=()=>{$('#qtext').innerHTML=qt[q];document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.q===q));
+      document.querySelectorAll('.mk').forEach(m=>{const a=+m.dataset.a;m.classList.toggle('a1',ans[0]===a);m.classList.toggle('a2',ans[1]===a)});
+      $('#ghosts').innerHTML=ans.map((a,i)=>a===null?'':`<g style="color:${i?'#7cc4ff':'#ff7a59'}" opacity=".85">${dipper(180,180,105,a,'')}</g>`).join('');
+      const nm=a=>a===null?'?':POS.find(p=>p[0]===a)[1];$('#picks').innerHTML=`내 답: ① 밤 11시 → <b style="color:var(--acc)">${nm(ans[0])}</b> · ② 새벽 2시 → <b style="color:var(--sky)">${nm(ans[1])}</b>`};
+    document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{q=+b.dataset.q;upd()});
+    document.querySelectorAll('.mk').forEach(m=>{const go=()=>{ans[q]=+m.dataset.a;if(q===0&&ans[1]===null)q=1;upd()};m.onclick=go;m.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
+    this.ans=ans;upd()},
+  check(){const[a,b]=this.ans;if(a===null||b===null)return'두 시각의 위치를 모두 골라야 한다.';const o1=a===135,o2=b===180;if(o1&&o2)return true;
+    if((a===45)||(b===0))return'반대로 돌린 것 같다. 북쪽 하늘의 별은 어느 방향으로 돌까?';return o1?'① 은 맞았다. ② 를 다시 생각해 보자.':o2?'② 는 맞았다. ① 을 다시 생각해 보자.':'둘 다 아니다. 몇 시간 지났는지부터 세어 보자.'},
+  hints:['북쪽 하늘의 별은 북극성을 중심으로 시계 반대 방향으로, 1시간에 15°씩 돌아요.','밤 11시는 3시간 뒤 → 45°(글자 한 칸), 새벽 2시는 6시간 뒤 → 90°(글자 두 칸)예요.'],
+  explain:`<ul><li>북두칠성도 북극성을 중심으로 <b>시계 반대 방향</b>으로 1시간에 15°씩 돈다.</li><li>오후 8시 → 밤 11시: 3시간 × 15° = <b>45°</b> 회전 (ㅇ) · 오후 8시 → 새벽 2시: 6시간 × 15° = <b>90°</b> 회전 (ㄴ)</li><li>별자리 모양은 그대로이고, 북극성을 중심으로 통째로 돌아간다.</li></ul>`
+};
+
+/* ---------- 자물쇠 5: O/X ---------- */
+const OX=[
+ ['별의 일주 운동은 지구가 자전하기 때문에 나타나는 겉보기 운동이다.',true],
+ ['별은 서쪽 하늘에서 떠서 동쪽 하늘로 진다.',false],
+ ['북극성은 지구 자전축의 연장선 근처에 있어서 거의 움직이지 않는 것처럼 보인다.',true],
+ ['태양과 달은 일주 운동을 하지 않는다.',false],
+ ['지구가 자전하기 때문에 낮과 밤이 반복된다.',true],
+ ['북쪽 하늘의 별은 북극성을 중심으로 시계 방향으로 돈다.',false]
+];
+STAGES[5]={
+  title:'오개념 판별기',
+  story:'마지막 금고는 판별기로 잠겨 있다. 화면에 문장 여섯 개가 떠 있다. “옳은 문장은 O, 틀린 문장은 X. 하나라도 틀리면 열리지 않는다.”',
+  fig(){return''},
+  puzzle(){return`<ol class="ox">${OX.map((o,i)=>`<li><span><b style="color:var(--sky)">${i+1}.</b> ${o[0]}</span><div class="choices" data-i="${i}"><button data-v="1" aria-label="${i+1}번 O">O</button><button data-v="0" aria-label="${i+1}번 X">X</button></div></li>`).join('')}</ol>`},
+  wire(){const a=OX.map(()=>null);document.querySelectorAll('.ox .choices').forEach(g=>{const i=+g.dataset.i;g.querySelectorAll('button').forEach(b=>b.onclick=()=>{a[i]=b.dataset.v==='1';g.querySelectorAll('button').forEach(x=>x.classList.toggle('sel',x===b))})});this.a=a},
+  check(){if(this.a.includes(null))return'아직 고르지 않은 문장이 있다.';const c=this.a.filter((v,i)=>v===OX[i][1]).length;return c===6?true:`판별기 표시: 6개 중 ${c}개 정답. 틀린 문장을 찾아보자.`},
+  hints:['일주 운동은 지구 자전 때문에 생기는 ‘겉보기’ 운동이에요. 지구가 서→동으로 자전하면 하늘의 천체는 어느 쪽으로 움직여 보일까요?','태양과 달도 하늘의 천체예요. 별처럼 동쪽에서 떠서 서쪽으로 지지요.'],
+  explain:`<ul><li>1 O · 2 X(별은 <b>동쪽에서 떠서 서쪽으로</b> 진다) · 3 O</li><li>4 X(태양·달·별 모두 일주 운동을 한다) · 5 O · 6 X(<b>시계 반대 방향</b>으로 돈다)</li></ul>`
+};
+
+/* ---------- 화면 ---------- */
+function intro(){
+  const cx=200,cy=120;let tr='';seed=5;for(let i=0;i<40;i++){const r=14+rnd()*190,a=rnd()*360;tr+=`<path d="${arc(cx,cy,r,a,a+50)}" stroke="#d8dcff" stroke-width="${(rnd()+.6).toFixed(1)}" opacity="${(rnd()*.5+.35).toFixed(2)}"/>`}
+  const going=S.stage>0&&S.stage<7;
+  $('#stage').innerHTML=`<section class="hero"><div><h2>별이 도는 밤,<br>천문대에 갇혔다</h2>
+  <p>밤 9시, 학교 천문대에서 관측을 하다 깜빡 잠들었다. 눈을 떠 보니 돔의 문이 잠겨 있다! 문을 열려면 다섯 개의 자물쇠를 풀어 글자 조각을 모아야 한다. 지구의 자전과 별의 일주 운동을 제대로 알아야만 탈출할 수 있다.</p>
+  <ul class="rules"><li>자물쇠 5개를 차례로 풀면 글자 조각 5개를 얻는다.</li><li>막히면 힌트를 볼 수 있지만, 볼 때마다 기록에 30초가 더해진다.</li><li>마지막 문에서 조각을 바른 순서로 맞추면 탈출!</li></ul>
+  ${going?'':`<label class="field">이름(탈출 인증서에 표시)<input id="nm" maxlength="20" autocomplete="off" placeholder="예: 3학년 2반 김별"></label>`}
+  <div class="row"><button class="btn" id="go">${going?'이어서 하기':'탈출 시작'}</button>${going?'<button class="ghost" id="reset">처음부터 다시</button>':''}</div></div>
+  <div class="fig-box"><svg viewBox="0 0 400 300" role="img" aria-label="북극성을 중심으로 도는 별 궤적과 천문대 돔"><defs><clipPath id="cl"><rect width="400" height="300" rx="10"/></clipPath></defs>
+  <g clip-path="url(#cl)"><rect width="400" height="300" fill="#080a26"/><g class="spin" fill="none" stroke-linecap="round">${tr}</g>
+  <circle cx="${cx}" cy="${cy}" r="3" fill="#fff"/>
+  <path d="M0,250 Q100,232 200,244 T400,240 L400,300 L0,300Z" fill="#11291f"/>
+  <path d="M250,250 L250,214 A44,44 0 0 1 338,214 L338,250Z" fill="#cdd2f0"/><path d="M250,214 A44,44 0 0 1 338,214Z" fill="#e8ebff"/>
+  <rect x="288" y="172" width="12" height="40" fill="#2a2f5a"/><rect x="284" y="226" width="20" height="24" rx="3" fill="#ff7a59"/>
+  <path d="M250,250 L338,250" stroke="#8e94c0"/></g></svg><p class="cap">북극성을 중심으로 도는 별들</p></div></section>`;
+  $('#go').onclick=()=>{if(!going){S={stage:1,name:($('#nm').value||'').trim(),start:Date.now(),pen:0,hints:0,wrong:0,shown:{},end:0};save()}render()};
+  if(going)$('#reset').onclick=()=>{S={stage:0,name:'',start:0,pen:0,hints:0,wrong:0,shown:{},end:0};save();render()};
+}
+function stageView(n){
+  const st=STAGES[n],fig=st.fig();
+  $('#stage').innerHTML=frame(n,st.title,st.story,fig,st.puzzle(),!fig);
+  st.wire();wireCommon(n);
+}
+function finalDoor(){
+  const order=['다','는','지','돈','구'];const got=[];
+  $('#stage').innerHTML=`<section class="card" id="card"><span class="badge">마지막 문</span><h2>돔의 문</h2>
+  <p class="story">문에 다섯 칸짜리 글자판이 있다. 그 위에 새겨진 문장: “지구가 돈다는 주장을 굽히지 않은 갈릴레이가 재판 뒤 중얼거렸다고 전해지는 말 — <b>그래도 ○○○○○</b>”</p>
+  <div class="slots" id="slots">${[0,1,2,3,4].map(()=>'<span></span>').join('')}</div>
+  <div class="tiles" id="tiles">${order.map((t,i)=>`<button data-i="${i}" aria-label="${t}">${t}</button>`).join('')}</div>
+  <div class="row" style="justify-content:center"><button class="ghost" id="undo">한 글자 지우기</button><button class="btn" id="open">문 열기</button></div>
+  <div class="msg" id="msg" role="status" style="text-align:center"></div></section>`;
+  const draw=()=>{$('#slots').innerHTML=[0,1,2,3,4].map(i=>`<span>${got[i]!==undefined?order[got[i]]:''}</span>`).join('');document.querySelectorAll('#tiles button').forEach(b=>b.disabled=got.includes(+b.dataset.i))};
+  document.querySelectorAll('#tiles button').forEach(b=>b.onclick=()=>{if(got.length<5){got.push(+b.dataset.i);draw()}});
+  $('#undo').onclick=()=>{got.pop();draw()};
+  $('#open').onclick=()=>{const w=got.map(i=>order[i]).join('');if(w==='지구는돈다'){S.stage=7;S.end=Date.now();save();render()}else{S.wrong++;save();$('#msg').className='msg bad';$('#msg').textContent=got.length<5?'다섯 칸을 모두 채워야 한다.':'문이 열리지 않는다. 지구가 어떻게 한다고?';const c=$('#card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake')}};
+}
+function done(){
+  const d=new Date(S.end||Date.now());
+  $('#stage').innerHTML=`<section class="cert"><span class="badge">탈출 성공</span><h2>“그래도 지구는 돈다”</h2>
+  <p style="color:var(--mute);margin:6px 0 0">${S.name?esc(S.name)+' 님은':'당신은'} 지구의 자전과 별의 일주 운동을 이해하고 천문대를 탈출했습니다.</p>
+  <dl><div><dt>탈출 기록</dt><dd>${fmt(elapsed())}</dd></div><div><dt>사용한 힌트</dt><dd>${S.hints}개</dd></div><div><dt>틀린 시도</dt><dd>${S.wrong}번</dd></div><div><dt>날짜</dt><dd>${d.getMonth()+1}월 ${d.getDate()}일</dd></div></dl>
+  <p style="color:var(--mute);font-size:14px;margin:0">이 화면을 캡처해 선생님께 제출하세요. (힌트 1개당 기록에 30초 포함)</p></section>
+  <div class="notes">
+   <div><h3>지구의 자전</h3><p>지구는 자전축을 중심으로 서쪽에서 동쪽으로 하루에 한 바퀴(1시간에 15°) 돈다. 그 결과 낮과 밤이 반복된다.</p></div>
+   <div><h3>일주 운동</h3><p>지구의 자전 때문에 태양·달·별이 하루에 한 바퀴씩 동쪽에서 서쪽으로 도는 것처럼 보이는 겉보기 운동이다.</p></div>
+   <div><h3>방향별 모습</h3><p>동쪽: 오른쪽 위로 떠오름 · 남쪽: 동→서로 호를 그림 · 서쪽: 오른쪽 아래로 짐 · 북쪽: 북극성 중심 시계 반대 방향 회전</p></div>
+   <div><h3>궤적 사진 읽기</h3><p>별 궤적의 중심각 ÷ 15° = 촬영 시간. 북극성은 자전축 연장선 근처라 거의 움직이지 않는다.</p></div>
+  </div><div class="row" style="justify-content:center"><button class="ghost" id="again">처음부터 다시 도전</button></div>`;
+  $('#again').onclick=()=>{S={stage:0,name:'',start:0,pen:0,hints:0,wrong:0,shown:{},end:0};save();render()};
+}
+function render(){status();if(S.stage===0)intro();else if(S.stage<=5)stageView(S.stage);else if(S.stage===6)finalDoor();else done()}
+if(S.stage>0&&S.stage<7){status();intro()}else render();
+}
+</script>
+</body>
+</html>
